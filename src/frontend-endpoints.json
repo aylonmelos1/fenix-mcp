@@ -1,0 +1,3505 @@
+{
+  "source": {
+    "frontendVersion": "2.19.1",
+    "appBundle": "/js/app.204b8f23.js",
+    "capturedAt": "2026-10-20",
+    "method": "Static callsite extraction from the loaded webpack bundle plus Chrome Network traces. Request bodies, cookie values, tokens and response data were not retained."
+  },
+  "auth": {
+    "baseURL": "https://fenix.cbm.ba.gov.br/api/v1",
+    "transportEvidence": "Axios baseURL=api/v1, withCredentials=true and withXSRFToken=true. Captured API requests carry Cookie and X-XSRF-TOKEN header names; no Authorization header was present.",
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/v1/csrf-cookie",
+        "purpose": "Obter cookies CSRF antes do login, registro e redefinição de senha."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/authenticate",
+        "purpose": "Login com email, password, version e hcaptcha_token; o frontend lê data.user."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/logout",
+        "purpose": "Encerrar sessão autenticada por cookie."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/password/email",
+        "purpose": "Solicitar email para redefinição de senha."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/password/reset",
+        "purpose": "Confirmar redefinição de senha."
+      }
+    ]
+  },
+  "serviceResources": [
+    "analysisPanel",
+    "autenticidade-usuarios",
+    "buildings-report",
+    "counties",
+    "county",
+    "dae",
+    "devolution",
+    "documentation-request",
+    "edifications",
+    "editpassword",
+    "employee",
+    "faqservice",
+    "forward",
+    "historicInternalRequest",
+    "historicRequest",
+    "inexigibilidades",
+    "mails",
+    "migracoes-sap",
+    "norm-items",
+    "norms",
+    "observation",
+    "occupation",
+    "occupations-divisions",
+    "parameterResponsibleRequest",
+    "parametros",
+    "parametros-internos/cnaes",
+    "parametros-tax",
+    "rankgraduation",
+    "registerUser",
+    "remanejamentos",
+    "report",
+    "request",
+    "responsavel-tecnico",
+    "roles",
+    "simulators",
+    "status-projeto-tecnico",
+    "survey",
+    "technicalproject",
+    "unity",
+    "users",
+    "utsm"
+  ],
+  "operations": [
+    {
+      "method": "DELETE",
+      "path": "/api/v1/autenticidade-usuarios/{param1}/documentos/{param2}",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "delete_autenticidade_usuarios_param_documentos_param"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/parametros-internos/cnaes/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "delete_parametros_internos_cnaes_param"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/remanejamentos/{param1}/documentos/{param2}",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "delete_remanejamentos_param_documentos_param"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/solicitacoes/{param1}/documentos/{param2}",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "delete_solicitacoes_param_documentos_param"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/documentos/{param3}",
+      "pathParameters": [
+        "param1",
+        "param2",
+        "param3"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "delete_solicitacoes_param_retificacoes_param_documentos_param"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/{param1}/models",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_param_models"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/autenticidade-usuarios/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_autenticidade_usuarios_param"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/autenticidade-usuarios/{param1}/documentos/{param2}/download",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_autenticidade_usuarios_param_documentos_param_download"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/cnaes",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_cnaes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/counties",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_counties"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/decretoEstadual",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_decretoestadual"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/detailsRequester",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_detailsrequester"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/division_group",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_division_group"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/edifications",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_edifications"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/edifications/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_edifications_param"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/getAllCountys",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "get_getallcountys"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/getDivisionGroup",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_getdivisiongroup"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/getNorms",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_getnorms"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/inexigibilidades",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 0,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "get_inexigibilidades"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/inexigibilidades/{param1}/certificado/download",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_inexigibilidades_param_certificado_download"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/isencao",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_isencao"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/list-counties",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_list_counties"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/listar-tipos-solicitacoes",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_listar_tipos_solicitacoes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/listaTodosTipoProjetos",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_listatodostipoprojetos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/migracoes-sap",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 0,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "get_migracoes_sap"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/migracoes-sap/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_migracoes_sap_param"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/migracoes-sap/{param1}/documentos/{param2}/download",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_migracoes_sap_param_documentos_param_download"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/norm_type",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_norm_type"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/occupation_group",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 2,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "get_occupation_group"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/parametros",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_parametros"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/parametros-tax",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_parametros_tax"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/parametros-tax/load-altered",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_parametros_tax_load_altered"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projetos-tecnicos/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_projetos_tecnicos_param"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projetos-tecnicos/{param1}/temp/correcao-emergencial",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_projetos_tecnicos_param_temp_correcao_emergencial"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/rankgraduation",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_rankgraduation"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/remanejamentos",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 0,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "get_remanejamentos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/remanejamentos/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_remanejamentos_param"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/remanejamentos/{param1}/documentos/{param2}/download",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_remanejamentos_param_documentos_param_download"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/remanejamentos/projeto-remanejavel",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_remanejamentos_projeto_remanejavel"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/request",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 0,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "get_request"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_roles"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/autorizacao-solicitante",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_autorizacao_solicitante"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/certificados/aprovacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_certificados_aprovacao"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/certificados/protocolo",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_certificados_protocolo"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/daes",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_daes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/contexto-devolucao/com-designacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_fluxo_contexto_devolucao_com_designacao"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/contexto-devolucao/sem-designacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_fluxo_contexto_devolucao_sem_designacao"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/funcionarios-p-encaminhamento",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_fluxo_funcionarios_p_encaminhamento"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/log-documentos?page={param2}&per_page={param3}",
+      "pathParameters": [
+        "param1",
+        "param2",
+        "param3"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_log_documentos_page_param_per_page_param"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_retificacoes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_retificacoes_param"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/certificado",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_retificacoes_param_certificado"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/diff",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_retificacoes_param_diff"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/documentos",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_retificacoes_param_documentos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/documentos/{param3}",
+      "pathParameters": [
+        "param1",
+        "param2",
+        "param3"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_solicitacoes_param_retificacoes_param_documentos_param"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/survey",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 0,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "get_survey"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/technicalproject",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 0,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "get_technicalproject"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tipoProjetoTecnico",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_tipoprojetotecnico"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/transferencias-solicitacoes/destinatarios",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_transferencias_solicitacoes_destinatarios"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/unity",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "get_unity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/usuarios/{param1}/edifications",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "get_usuarios_param_edifications"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/accpetTechnicalproject",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_accpettechnicalproject"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/address",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_address"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/AllNormItems",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_allnormitems"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/analytics-prod-report-generate-pdf",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_analytics_prod_report_generate_pdf"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/autenticidade-usuarios/{param1}/deferir",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_autenticidade_usuarios_param_deferir"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/autenticidade-usuarios/{param1}/indeferir",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_autenticidade_usuarios_param_indeferir"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/autenticidade-usuarios/{param1}/solicitar-reanalise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_autenticidade_usuarios_param_solicitar_reanalise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/autenticidade-usuarios/solicitar-analise",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_autenticidade_usuarios_solicitar_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/avcbHasAcp",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_avcbhasacp"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/buscarDetalheRelatorioAprovacao",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_buscardetalherelatorioaprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calculate-rate-fire",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_calculate_rate_fire"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/calculate-rate-survey",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_calculate_rate_survey"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/comprovantes-pagamento/verificar-duplicidade",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_comprovantes_pagamento_verificar_duplicidade"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/definir-novo-status",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_definir_novo_status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/definirStatusV2",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_definirstatusv2"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/deleteXLS",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_deletexls"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/desabilitar-municipios",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_desabilitar_municipios"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/devolution",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_devolution"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/devolution-by-request",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_devolution_by_request"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/documentos-solicitados",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_documentos_solicitados"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/documentos-solicitados-vistoria",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_documentos_solicitados_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/documents-survey-destroy",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_documents_survey_destroy"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/documents-survey-download",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_documents_survey_download"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/documents-survey-load",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_documents_survey_load"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/documents-survey-store",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_documents_survey_store"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/downloads",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_downloads"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/edifications",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_edifications"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/edifications-carregar-dados-extras",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_edifications_carregar_dados_extras"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/editPassword",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_editpassword"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/employee",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_employee"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/employee-update",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_employee_update"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/files",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_files"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/firstAcess",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_firstacess"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/generate-buildings-report",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_generate_buildings_report"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/generateInspectionAnalysisReport",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_generateinspectionanalysisreport"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/generateInstitutionActivityReport",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_generateinstitutionactivityreport"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/generateReport",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_generatereport"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gerar-dae",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_gerar_dae"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gerarNumeroSolicitacao",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_gerarnumerosolicitacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gerarRelatorioDistribuicaoAtividade",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_gerarrelatoriodistribuicaoatividade"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/gerarRelatorioProdutividade",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_gerarrelatorioprodutividade"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/get-funcionario-anterior-por-status",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_get_funcionario_anterior_por_status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/get-last-devolution-by-request",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_get_last_devolution_by_request"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/get-permissao-edification",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_get_permissao_edification"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getAddressHistoric",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getaddresshistoric"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getAllDivisions",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getalldivisions"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getAllDivisionsByOccpationId",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getalldivisionsbyoccpationid"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getAllOccupations",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getalloccupations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getCnaeData",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getcnaedata"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getCountysByUnity",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getcountysbyunity"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getDocumentationsHistoric",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getdocumentationshistoric"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getEdificationHistoric",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getedificationhistoric"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getEmployeeDetailsById",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getemployeedetailsbyid"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getEmployeeProfile",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 2,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getemployeeprofile"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getIndicators",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getindicators"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getJustificativaRetificacao",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getjustificativaretificacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getPermissaoArquivar",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getpermissaoarquivar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getPermissaoDesarquivar",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getpermissaodesarquivar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getProjectHistoric",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getprojecthistoric"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getProjectSimplified",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getprojectsimplified"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getRequest",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 2,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getrequest"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getRetificacoesPermitidas",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "post_getretificacoespermitidas"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getSolicitacaoAtual",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getsolicitacaoatual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getSolicitacaoDataById",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_getsolicitacaodatabyid"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/getSolicitacoesPermitidas",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": true,
+      "id": "post_getsolicitacoespermitidas"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/habilitar-municipios",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_habilitar_municipios"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/imprimir-dae",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_imprimir_dae"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/inexigibilidades",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_inexigibilidades"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/is-notificado-vistoria",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_is_notificado_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/list-counties-enabled",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_list_counties_enabled"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/list-occupation-division",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_list_occupation_division"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lista-funcionario-por-funcao",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_lista_funcionario_por_funcao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lista-municipio-distancia-unidade",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_lista_municipio_distancia_unidade"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/lista-responsaveis-tecnicos",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_lista_responsaveis_tecnicos"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/listaFuncionariosFuncaoUnidade",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 2,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_listafuncionariosfuncaounidade"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/listarFuncionarioPorRolesUnidade",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_listarfuncionarioporrolesunidade"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/listarRelatorioStatusProjeto",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_listarrelatoriostatusprojeto"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/mail-user",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_mail_user"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/migracoes-sap/{param1}/deferir-correcao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_migracoes_sap_param_deferir_correcao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/migracoes-sap/{param1}/indeferir-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_migracoes_sap_param_indeferir_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/migracoes-sap/{param1}/indeferir-correcao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_migracoes_sap_param_indeferir_correcao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/migracoes-sap/{param1}/iniciar-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_migracoes_sap_param_iniciar_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/migracoes-sap/{param1}/iniciar-correcao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_migracoes_sap_param_iniciar_correcao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/migracoes-sap/{param1}/solicitar-correcao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_migracoes_sap_param_solicitar_correcao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/migracoes-sap/solicitar-analise",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_migracoes_sap_solicitar_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/municipios",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_municipios"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/norm-items-save",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_norm_items_save"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/norm-items-update",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_norm_items_update"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/normItems",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_normitems"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/norms",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_norms"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/norms-update",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_norms_update"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/notificar-aprovacao",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_notificar_aprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/observation",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_observation"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/observation-by-request",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_observation_by_request"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/observation-destroy",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_observation_destroy"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/observation/notify",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_observation_notify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/observation/storeObservation",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_observation_storeobservation"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/observation/updateObservation",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_observation_updateobservation"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/occupationByUnit",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_occupationbyunit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/parametros-internos/cnaes",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_parametros_internos_cnaes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/parametros-tax/confirmar",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_parametros_tax_confirmar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/parametros-tax/load-parametros",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_parametros_tax_load_parametros"
+    },
+    {
+      "id": "post_api_v1_password_email",
+      "method": "POST",
+      "path": "/api/v1/password/email",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false
+    },
+    {
+      "id": "post_api_v1_password_reset",
+      "method": "POST",
+      "path": "/api/v1/password/reset",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/pega-funcionario-anterior",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_pega_funcionario_anterior"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/pegarDaePorID",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_pegardaeporid"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/pending-notification",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_pending_notification"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projetos-tecnicos/{param1}/temp/correcao-emergencial/confirmar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_projetos_tecnicos_param_temp_correcao_emergencial_confirmar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projetos-tecnicos/{param1}/temp/correcao-emergencial/recusar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_projetos_tecnicos_param_temp_correcao_emergencial_recusar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projetos/{param1}/documentos/{param2}/alterar-status-aprovacao",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_projetos_param_documentos_param_alterar_status_aprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/proprietarioResponsavel",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_proprietarioresponsavel"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/proprietarioResponsavelHistorico",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_proprietarioresponsavelhistorico"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/relatorioAprovacao",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_relatorioaprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/remanejamentos",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_remanejamentos"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/remanejamentos/{param1}/documentos",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_remanejamentos_param_documentos"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/remanejamentos/{param1}/indeferir",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_remanejamentos_param_indeferir"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/remanejamentos/{param1}/remanejar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_remanejamentos_param_remanejar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/remanejamentos/{param1}/solicitar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_remanejamentos_param_solicitar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/remove-municipio-distancia-unidade",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_remove_municipio_distancia_unidade"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/report/gerar-relatorio-pdf",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_report_gerar_relatorio_pdf"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/request/download",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_request_download"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/responsavel-tecnico",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_responsavel_tecnico"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/responsavel-tecnico-destroy",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_responsavel_tecnico_destroy"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/responsavel-tecnico-update",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_responsavel_tecnico_update"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/resposta/store",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_resposta_store"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/return-project-type",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_return_project_type"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/returnToPreviusResponsable",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_returntopreviusresponsable"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/rolesByUnit",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_rolesbyunit"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/save_auxiliar_vistoria",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_save_auxiliar_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/search-requester",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_search_requester"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/sendActivateEmail",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_sendactivateemail"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/setProjectStatus",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 2,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_setprojectstatus"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/setProjectStatusInBatch",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_setprojectstatusinbatch"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/simulator-calculate",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 2,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_simulator_calculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/alterar-comprovacao-isencao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_alterar_comprovacao_isencao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/alterar-declaracao-isencao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_alterar_declaracao_isencao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/autorizar-solicitante",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_autorizar_solicitante"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/certificados/aprovacao/reemitir",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_certificados_aprovacao_reemitir"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/daes/gerar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_daes_gerar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/daes/recalculados",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_daes_recalculados"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/documentos",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_documentos"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/aprovar-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_aprovar_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/comunicacao-analista-solicitante/finalizar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_comunicacao_analista_solicitante_finalizar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/comunicacao-analista-solicitante/iniciar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_comunicacao_analista_solicitante_iniciar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/confirmar-documentacao-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_confirmar_documentacao_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/devolucao/em-analise-p-encaminhado-sat",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_devolucao_em_analise_p_encaminhado_sat"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/devolucao/em-analise-p-protocolado",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_devolucao_em_analise_p_protocolado"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/devolucao/encaminhado-p-protocolado",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_devolucao_encaminhado_p_protocolado"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/devolucao/pendente-aprovacao-p-em-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_devolucao_pendente_aprovacao_p_em_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/devolucao/pendente-hml-p-pendente-aprovacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_devolucao_pendente_hml_p_pendente_aprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/devolucao/pendente-validacao-p-em-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_devolucao_pendente_validacao_p_em_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/finalizar-retificacao-solicitada-na-etapa-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_finalizar_retificacao_solicitada_na_etapa_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/homologar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_homologar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/migracao-sap-direta/deferir-correcao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_migracao_sap_direta_deferir_correcao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/migracao-sap-direta/solicitar-correcao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_migracao_sap_direta_solicitar_correcao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/notificar-pendencias",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_notificar_pendencias"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/solicitar-retificacao-na-etapa-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_solicitar_retificacao_na_etapa_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/validar-aprovacao-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_validar_aprovacao_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/acp/validar-pendencias-notificadas",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_acp_validar_pendencias_notificadas"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/arquivar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_arquivar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/aprovar-vistoria",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_aprovar_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/comunicacao-vistoriador-solicitante/finalizar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_comunicacao_vistoriador_solicitante_finalizar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/comunicacao-vistoriador-solicitante/iniciar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_comunicacao_vistoriador_solicitante_iniciar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/confirmar-aprovacao-vistoria",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_confirmar_aprovacao_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/devolucao/em-vistoria-p-protocolado",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_devolucao_em_vistoria_p_protocolado"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/devolucao/pendente-aprovacao-p-confirmacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_devolucao_pendente_aprovacao_p_confirmacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/devolucao/pendente-confirmacao-p-em-vistoria",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_devolucao_pendente_confirmacao_p_em_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/devolucao/pendente-hml-p-pendente-aprovacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_devolucao_pendente_hml_p_pendente_aprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/devolucao/pendente-validacao-p-em-vistoria",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_devolucao_pendente_validacao_p_em_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/homologar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_homologar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/notificar-pendencias",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_notificar_pendencias"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/validar-aprovacao-vistoria",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_validar_aprovacao_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/avcb/validar-pendencias-notificadas",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_avcb_validar_pendencias_notificadas"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/correcao-protocolo/finalizar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_correcao_protocolo_finalizar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/correcao-protocolo/iniciar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_correcao_protocolo_iniciar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/desarquivar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_desarquivar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/aprovar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_aprovar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/comunicacao-analista-solicitante/finalizar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_comunicacao_analista_solicitante_finalizar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/comunicacao-analista-solicitante/iniciar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_comunicacao_analista_solicitante_iniciar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/devolucao/em-analise-p-protocolado",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_devolucao_em_analise_p_protocolado"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/devolucao/pendente-aprovacao-p-em-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_devolucao_pendente_aprovacao_p_em_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/devolucao/pendente-validacao-p-em-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_devolucao_pendente_validacao_p_em_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/finalizar-retificacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_finalizar_retificacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/notificar-pendencias",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_notificar_pendencias"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/solicitar-retificacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_solicitar_retificacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/validar-aprovacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_validar_aprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/analise/validar-pendencias-notificadas",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_analise_validar_pendencias_notificadas"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/aprovar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_aprovar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/comunicacao-vistoriador-solicitante/finalizar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_comunicacao_vistoriador_solicitante_finalizar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/comunicacao-vistoriador-solicitante/iniciar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_comunicacao_vistoriador_solicitante_iniciar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/confirmar-aprovacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_confirmar_aprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/devolucao/em-vistoria-p-encaminhamento",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_devolucao_em_vistoria_p_encaminhamento"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/devolucao/encaminhamento-p-aprovacao-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_devolucao_encaminhamento_p_aprovacao_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/devolucao/pendente-aprovacao-p-confirmacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_devolucao_pendente_aprovacao_p_confirmacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/devolucao/pendente-confirmacao-p-em-vistoria",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_devolucao_pendente_confirmacao_p_em_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/devolucao/pendente-hml-p-pendente-aprovacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_devolucao_pendente_hml_p_pendente_aprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/devolucao/pendente-validacao-p-em-vistoria",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_devolucao_pendente_validacao_p_em_vistoria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/encaminhar-p-vistoriador",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_encaminhar_p_vistoriador"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/homologar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_homologar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/notificar-pendencias",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_notificar_pendencias"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/validar-aprovacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_validar_aprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-avcb/vistoria/validar-pendencias-notificadas",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_avcb_vistoria_validar_pendencias_notificadas"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/aprovar-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_aprovar_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/comunicacao-analista-solicitante/finalizar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_comunicacao_analista_solicitante_finalizar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/comunicacao-analista-solicitante/iniciar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_comunicacao_analista_solicitante_iniciar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/devolucao/em-analise-p-protocolado",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_devolucao_em_analise_p_protocolado"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/devolucao/pendente-aprovacao-p-em-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_devolucao_pendente_aprovacao_p_em_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/devolucao/pendente-hml-p-pendente-aprovacao",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_devolucao_pendente_hml_p_pendente_aprovacao"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/devolucao/pendente-validacao-p-em-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_devolucao_pendente_validacao_p_em_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/finalizar-retificacao-solicitada-na-etapa-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_finalizar_retificacao_solicitada_na_etapa_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/homologar",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_homologar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/notificar-pendencias",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_notificar_pendencias"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/solicitar-retificacao-na-etapa-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_solicitar_retificacao_na_etapa_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/validar-aprovacao-analise",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_validar_aprovacao_analise"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/fluxo/pts-clcb/validar-pendencias-notificadas",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_fluxo_pts_clcb_validar_pendencias_notificadas"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_retificacoes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/cancelar",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_retificacoes_param_cancelar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/devolver",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_retificacoes_param_devolver"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/documentos",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_retificacoes_param_documentos"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/encaminhar",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_retificacoes_param_encaminhar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/homologar",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_retificacoes_param_homologar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/solicitacoes/{param1}/retificacoes/{param2}/validar",
+      "pathParameters": [
+        "param1",
+        "param2"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_solicitacoes_param_retificacoes_param_validar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/store-municipio-distancia-unidade",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_store_municipio_distancia_unidade"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storeDevolution",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_storedevolution"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/storeUser",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_storeuser"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/tax-report-generate-pdf",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_tax_report_generate_pdf"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/tax-report-index",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_tax_report_index"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/technicalproject",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_technicalproject"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/technicalprojectdocs",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_technicalprojectdocs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/technicalprojectResume",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_technicalprojectresume"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/transferencias-solicitacoes/transferir",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_transferencias_solicitacoes_transferir"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/unities",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_unities"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/unity-comandante",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_unity_comandante"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/unity-store",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_unity_store"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/unity-update",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_unity_update"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/update-sem-taxa-complementar",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_update_sem_taxa_complementar"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/utsm/habilitar-municipios",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_utsm_habilitar_municipios"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/validate-mandatory-documents",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_validate_mandatory_documents"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/validateApproval",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "post_validateapproval"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/verificar-autenticidade",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_verificar_autenticidade"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/verificar-status-atual",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_verificar_status_atual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/verificarDocumentos",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_verificardocumentos"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/verificarPagamento",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_verificarpagamento"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/verify-request",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_verify_request"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/zipDocs",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "read-only",
+      "observedInChrome": false,
+      "id": "post_zipdocs"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/edifications/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "put_edifications_param"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/occupation-division/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "put_occupation_division_param"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/parametros-internos/cnaes/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "put_parametros_internos_cnaes_param"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/parametros-tax/{param1}",
+      "pathParameters": [
+        "param1"
+      ],
+      "dynamicPath": true,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "put_parametros_tax_param"
+    },
+    {
+      "id": "put_api_v1_profile",
+      "method": "PUT",
+      "path": "/api/v1/profile",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/transferRequests",
+      "pathParameters": [],
+      "dynamicPath": false,
+      "sourceCallCount": 1,
+      "access": "mutating-or-unclear",
+      "observedInChrome": false,
+      "id": "put_transferrequests"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "fenix-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Private OAuth-protected MCP server for the Fênix CBMBA web API",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "keys": "node scripts/generate-oauth-keys.mjs",
+    "migrate:oauth": "node scripts/migrate-oauth.mjs",
+    "docs:endpoints": "node scripts/render-endpoint-docs.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/node": "^2.0.0",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "dotenv": "^16.4.7",
+    "pg": "^8.13.1",
+    "tough-cookie": "^5.1.2",
+    "zod": "^4.0.0"
+  }
+}
