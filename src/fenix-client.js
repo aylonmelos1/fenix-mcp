@@ -7,13 +7,17 @@ const API_PREFIX = '/api/v1/';
 const limiterBySession = new Map();
 
 export class FenixApiError extends Error {
-  constructor(message, { status, method, operationId, code } = {}) {
+  constructor(message, { status, method, operationId, code, validationFields, responseContentType, responseBodyType, responseKeys } = {}) {
     super(message);
     this.name = 'FenixApiError';
     this.status = status;
     this.method = method;
     this.operationId = operationId;
     this.code = code;
+    this.validationFields = validationFields;
+    this.responseContentType = responseContentType;
+    this.responseBodyType = responseBodyType;
+    this.responseKeys = responseKeys;
   }
 
   toJSON() {
@@ -23,7 +27,11 @@ export class FenixApiError extends Error {
       status: this.status,
       method: this.method,
       operationId: this.operationId,
-      code: this.code
+      code: this.code,
+      ...(this.validationFields ? { validationFields: this.validationFields } : {}),
+      ...(this.responseContentType ? { responseContentType: this.responseContentType } : {}),
+      ...(this.responseBodyType ? { responseBodyType: this.responseBodyType } : {}),
+      ...(this.responseKeys ? { responseKeys: this.responseKeys } : {})
     };
   }
 }
@@ -147,13 +155,14 @@ function getLimiter(key, limit) {
 }
 
 export class FenixClient {
-  constructor({ baseUrl = 'https://fenix.cbm.ba.gov.br', timeoutMs = 30_000, rateLimitPerMinute = 60, maxRetries = 1, cookieJar, session, grantId, onSessionUpdate }) {
+  constructor({ baseUrl = 'https://fenix.cbm.ba.gov.br', proxyToken = '', timeoutMs = 30_000, rateLimitPerMinute = 60, maxRetries = 1, cookieJar, session, grantId, onSessionUpdate }) {
     const parsed = new URL(baseUrl);
     if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.search || parsed.hash) {
       throw new Error('FENIX_BASE_URL must be an HTTPS URL without credentials, query, or fragment');
     }
     this.origin = parsed.origin;
     this.apiBaseUrl = `${this.origin}/api/v1/`;
+    this.proxyToken = proxyToken;
     this.timeoutMs = timeoutMs;
     this.maxRetries = maxRetries;
     this.session = session || { cookieJar };
@@ -164,7 +173,7 @@ export class FenixClient {
     this.limiter = getLimiter(sessionKey, rateLimitPerMinute);
   }
 
-  static async login({ baseUrl = 'https://fenix.cbm.ba.gov.br', timeoutMs = 30_000, email, password, hcaptchaToken, version = '2.19.1' }) {
+  static async login({ baseUrl = 'https://fenix.cbm.ba.gov.br', proxyToken = '', timeoutMs = 30_000, email, password, hcaptchaToken, version = '2.19.1' }) {
     const parsed = new URL(baseUrl);
     if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.search || parsed.hash) {
       throw new Error('FENIX_BASE_URL must be an HTTPS URL without credentials, query, or fragment');
@@ -175,7 +184,7 @@ export class FenixClient {
     const jar = new CookieJar();
     const csrfResponse = await fetchWithTimeout(csrfUrl, {
       method: 'GET',
-      headers: { Accept: 'application/json', Origin: origin, Referer: `${origin}/` },
+      headers: proxyHeaders({ Accept: 'application/json', Origin: origin, Referer: `${origin}/` }, proxyToken),
       redirect: 'manual'
     }, timeoutMs);
     await setCookies(csrfResponse, csrfUrl.toString(), jar);
@@ -184,14 +193,14 @@ export class FenixClient {
       throw new FenixApiError('Could not initialize the Fenix login session.', { status: csrfResponse.status, code: 'csrf_failed' });
     }
 
-    const loginHeaders = {
+    const loginHeaders = proxyHeaders({
       Accept: 'application/json',
       'Content-Type': 'application/json',
       'X-Requested-With': 'XMLHttpRequest',
       Origin: origin,
       Referer: `${origin}/`,
       Cookie: jar.getCookieStringSync(loginUrl.toString())
-    };
+    }, proxyToken);
     const xsrf = csrfHeader(jar, loginUrl.toString());
     if (xsrf) loginHeaders['X-XSRF-TOKEN'] = xsrf;
     const loginResponse = await fetchWithTimeout(loginUrl, {
@@ -231,6 +240,7 @@ export class FenixClient {
         Cookie: this.jar.getCookieStringSync(url.toString()),
         'X-Requested-With': 'XMLHttpRequest'
       };
+      if (this.proxyToken) headers['X-Fenix-MCP-Proxy-Key'] = this.proxyToken;
       const xsrf = csrfHeader(this.jar, url.toString());
       if (xsrf) headers['X-XSRF-TOKEN'] = xsrf;
       if (body !== undefined && mutating) headers['Content-Type'] = 'application/json';
@@ -270,7 +280,25 @@ export class FenixClient {
       }
       const text = await boundedBody(response);
       if (!response.ok) {
-        throw new FenixApiError(`Fenix returned HTTP ${response.status}.`, { status: response.status, method, operationId: operation.id, code: 'upstream_error' });
+        const contentType = (response.headers.get('content-type') || '').split(';', 1)[0].slice(0, 100) || 'unknown';
+        const payload = parsePayload(text, contentType);
+        const responseBodyType = !text ? 'empty'
+          : payload?.bodyOmitted === true ? 'omitted'
+            : Array.isArray(payload) ? 'json-array'
+              : payload && typeof payload === 'object' ? 'json-object' : 'text';
+        const responseKeys = payload && typeof payload === 'object' && !Array.isArray(payload) && payload.bodyOmitted !== true
+          ? Object.keys(payload).slice(0, 30).map((key) => key.slice(0, 120))
+          : undefined;
+        throw new FenixApiError(`Fenix returned HTTP ${response.status}.`, {
+          status: response.status,
+          method,
+          operationId: operation.id,
+          code: 'upstream_error',
+          validationFields: response.status === 422 ? validationFieldNames(payload) : undefined,
+          responseContentType: response.status === 422 ? contentType : undefined,
+          responseBodyType: response.status === 422 ? responseBodyType : undefined,
+          responseKeys: response.status === 422 ? responseKeys : undefined
+        });
       }
       return {
         ok: true,
@@ -280,6 +308,29 @@ export class FenixClient {
       };
     }
   }
+}
+
+function validationFieldNames(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return undefined;
+  const errors = payload.errors ?? payload.validationErrors ?? payload.data?.errors ?? payload.data?.validationErrors;
+  const metadataKeys = new Set(['message', 'error', 'errors', 'code', 'status', 'exception', 'trace']);
+  const candidates = errors && typeof errors === 'object'
+    ? Array.isArray(errors)
+      ? errors.map((entry) => entry && typeof entry === 'object' && !Array.isArray(entry)
+        ? entry.field ?? entry.parameter ?? entry.propertyPath ?? entry.path
+        : undefined)
+      : Object.keys(errors)
+    : Object.keys(payload).filter((key) => !metadataKeys.has(key));
+  const fields = [...new Set(candidates
+    .filter((field) => typeof field === 'string' && field.trim())
+    .slice(0, 50)
+    .map((field) => field.slice(0, 120)))];
+  return fields.length ? fields : undefined;
+}
+
+function proxyHeaders(headers, proxyToken) {
+  if (proxyToken) headers['X-Fenix-MCP-Proxy-Key'] = proxyToken;
+  return headers;
 }
 
 async function fetchWithTimeout(url, init, timeoutMs) {

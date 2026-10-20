@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "fenix-mcp-upstream-proxy",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-20",
+  "placement": {
+    "region": "aws:sa-east-1"
+  },
+  "routes": [
+    {
+      "pattern": "fenix.example.com/api/v1/*",
+      "zone_name": "example.com"
+    }
+  ],
+  "workers_dev": false,
+  "observability": {
+    "enabled": false,
+    "logs": {
+      "invocation_logs": false
+    }
+  }
+}

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import 'dotenv/config';
+import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -93,6 +94,7 @@ function htmlFormOriginAllowed(req, publicOrigin) {
 async function main() {
   const config = loadConfig();
   const catalog = JSON.parse(await readFile(resolve(root, 'src/frontend-endpoints.json'), 'utf8'));
+  const fenixSkill = await readFile(resolve(root, 'skills/fenix/SKILL.md'), 'utf8');
   const operations = catalog.operations;
   const oauthStore = new PgOAuthStore({
     connectionString: config.oauth.databaseUrl,
@@ -102,8 +104,12 @@ async function main() {
   });
   await oauthStore.initialize();
   await oauthStore.pruneExpiredSessions();
+  await oauthStore.pruneApiFailures();
   const sessionPruneTimer = setInterval(() => {
-    oauthStore.pruneExpiredSessions().catch(() => console.error('[fenix-mcp] expired session cleanup failed'));
+    Promise.all([
+      oauthStore.pruneExpiredSessions().catch(() => console.error('[fenix-mcp] expired session cleanup failed')),
+      oauthStore.pruneApiFailures().catch(() => console.error('[fenix-mcp] API failure cleanup failed'))
+    ]);
   }, 60 * 60 * 1000);
   sessionPruneTimer.unref();
 
@@ -117,6 +123,7 @@ async function main() {
   oauth.fenixLogin = async ({ email, password, hcaptchaToken, version }) => {
     return FenixClient.login({
       baseUrl: config.fenix.baseUrl,
+      proxyToken: config.fenix.proxyToken,
       timeoutMs: config.fenix.timeoutMs,
       email,
       password,
@@ -141,6 +148,7 @@ async function main() {
   const metadataUrl = getOAuthProtectedResourceMetadataUrl(resourceUrl);
   const limiter = {
     register: rateLimit(20),
+    authorizePage: rateLimit(60),
     authorize: rateLimit(10),
     token: rateLimit(60)
   };
@@ -154,7 +162,15 @@ async function main() {
       grantId: authInfo.extra.grantId,
       onSessionUpdate: (grantId, session) => oauthStore.updateSession(grantId, session)
     });
-    return buildMcpServer({ client, operations, frontendVersion: catalog.source.frontendVersion });
+    return buildMcpServer({
+      client,
+      operations,
+      frontendVersion: catalog.source.frontendVersion,
+      skillMarkdown: fenixSkill,
+      failureStore: oauthStore,
+      grantKey: createHash('sha256').update(authInfo.extra.grantId).digest('hex'),
+      exposeSkillsExtension: context.era === 'modern'
+    });
   });
   const mcpHandler = toNodeHandler(httpHandler);
 
@@ -187,7 +203,12 @@ async function main() {
             return json(res, 201, client);
           } catch (error) {
             if (error instanceof OAuthStoreError) return json(res, 503, { error: 'temporarily_unavailable' });
-            if (error.statusCode === 413) return json(res, 413, { error: 'request_too_large' });
+            if (error.code === 'temporarily_unavailable') return json(res, 503, { error: 'temporarily_unavailable' });
+            if (error.statusCode === 413) {
+              res.shouldKeepAlive = false;
+              res.setHeader('Connection', 'close');
+              return json(res, 413, { error: 'request_too_large' });
+            }
             return oauthErrorBody(res, 400, error.code || 'invalid_client_metadata', error.message);
           }
         });
@@ -195,13 +216,15 @@ async function main() {
 
       if (pathname === '/oauth/authorize') {
         if (req.method === 'GET') {
-          try {
-            const result = await oauth.authorizeForm(Object.fromEntries(url.searchParams.entries()));
-            return html(res, result.status || 200, result.body);
-          } catch (error) {
-            if (error instanceof OAuthStoreError) return html(res, 503, oauth.errorPage('temporarily_unavailable', 'O serviço de autorização está temporariamente indisponível. Tente novamente.').body);
-            throw error;
-          }
+          return limiter.authorizePage(req, res, async () => {
+            try {
+              const result = await oauth.authorizeForm(Object.fromEntries(url.searchParams.entries()));
+              return html(res, result.status || 200, result.body);
+            } catch (error) {
+              if (error instanceof OAuthStoreError) return html(res, 503, oauth.errorPage('temporarily_unavailable', 'O serviço de autorização está temporariamente indisponível. Tente novamente.').body);
+              throw error;
+            }
+          });
         }
         if (req.method === 'POST') {
           if (!htmlFormOriginAllowed(req, config.oauth.publicUrl)) return json(res, 403, { error: 'origin_not_allowed' });
@@ -217,7 +240,11 @@ async function main() {
               return html(res, result.status || 400, result.body);
             } catch (error) {
               if (error instanceof OAuthStoreError) return html(res, 503, oauth.errorPage('temporarily_unavailable', 'O serviço de autorização está temporariamente indisponível. Tente novamente.').body);
-              if (error.statusCode === 413) return html(res, 413, oauth.errorPage('invalid_request', 'A solicitação excede o limite permitido.').body);
+              if (error.statusCode === 413) {
+                res.shouldKeepAlive = false;
+                res.setHeader('Connection', 'close');
+                return html(res, 413, oauth.errorPage('invalid_request', 'A solicitação excede o limite permitido.').body);
+              }
               console.error(`[fenix-mcp] OAuth authorization error (${error.code || error.name || 'error'})`);
               return html(res, 500, oauth.errorPage('server_error', 'Não foi possível concluir a autorização. Tente novamente.').body);
             }
@@ -235,7 +262,11 @@ async function main() {
             return json(res, 200, tokens);
           } catch (error) {
             if (error instanceof OAuthStoreError) return json(res, 503, { error: 'temporarily_unavailable' });
-            if (error.statusCode === 413) return json(res, 413, { error: 'request_too_large' });
+            if (error.statusCode === 413) {
+              res.shouldKeepAlive = false;
+              res.setHeader('Connection', 'close');
+              return json(res, 413, { error: 'request_too_large' });
+            }
             console.error(`[fenix-mcp] OAuth token error (${error.code || 'invalid_request'})`);
             return tokenClientError(res, req, error);
           }
@@ -249,7 +280,11 @@ async function main() {
             return json(res, 200, {});
           } catch (error) {
             if (error instanceof OAuthStoreError) return json(res, 503, { error: 'temporarily_unavailable' });
-            if (error.statusCode === 413) return json(res, 413, { error: 'request_too_large' });
+            if (error.statusCode === 413) {
+              res.shouldKeepAlive = false;
+              res.setHeader('Connection', 'close');
+              return json(res, 413, { error: 'request_too_large' });
+            }
             if (error.code === 'invalid_client' && /^Basic\s+/i.test(req.headers.authorization || '')) {
               res.setHeader('WWW-Authenticate', 'Basic realm="fenix-mcp-token"');
               return oauthErrorBody(res, 401, error.code, error.message);
@@ -276,6 +311,10 @@ async function main() {
       else res.end();
     }
   });
+
+  server.headersTimeout = 15_000;
+  server.requestTimeout = 30_000;
+  server.keepAliveTimeout = 5_000;
 
   server.listen(config.mcp.port, config.mcp.host, () => {
     console.error(`[fenix-mcp] HTTP listening on ${config.mcp.host}:${config.mcp.port}/mcp`);

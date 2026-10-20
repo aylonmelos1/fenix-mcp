@@ -9,9 +9,9 @@ import { sha256Hex } from './oauth-crypto.js';
 //
 // Supports both client registration mechanisms defined by the MCP authorization spec:
 //   * Dynamic Client Registration (RFC 7591) via POST /oauth/register.
-//   * Client ID Metadata Document — the client_id is a URL to a `client.json`
-//     document (as used by ChatGPT). The server fetches it to learn the client's
-//     redirect_uris, token_endpoint_auth_method and jwks_uri.
+//   * Client ID Metadata Document — the client_id is a URL to a client metadata
+//     document (used by clients such as ChatGPT and Claude). The server fetches
+//     it to learn the client's redirect_uris, token_endpoint_auth_method and jwks_uri.
 //
 // Token endpoint client authentication supports client_secret_post/basic, none,
 // and private_key_jwt (RFC 7523) — the latter verifies an RS256 client assertion
@@ -24,6 +24,13 @@ const AUTH_CODE_TTL_MS = 5 * 60 * 1000; // 5 min
 const DOC_TIMEOUT_MS = 10_000;
 const MAX_METADATA_BYTES = 5 * 1024;
 const MAX_JWKS_BYTES = 64 * 1024;
+const MAX_OAUTH_METADATA_CACHE_ENTRIES = 500;
+
+function cacheSetBounded(cache, key, value) {
+  cache.delete(key);
+  cache.set(key, value);
+  if (cache.size > MAX_OAUTH_METADATA_CACHE_ENTRIES) cache.delete(cache.keys().next().value);
+}
 
 function rand(len) {
   return randomBytes(len).toString('base64url');
@@ -116,7 +123,7 @@ export class FenixOAuthServer {
       revocation_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic', 'private_key_jwt', 'none'],
       token_endpoint_auth_signing_alg_values_supported: ['RS256'],
       code_challenge_methods_supported: ['S256'],
-      scopes_supported: [],
+      scopes_supported: ['offline_access'],
       client_id_metadata_document_supported: true,
       authorization_response_iss_parameter_supported: true
     };
@@ -172,12 +179,13 @@ export class FenixOAuthServer {
       scope: body.scope || '',
       contacts: body.contacts || []
     };
-    await this.store.registerClient({
+    const registeredClientKey = await this.store.registerClient({
       clientId: client.client_id,
       kind: 'dcr',
       data: Object.fromEntries(Object.entries(client).filter(([key]) => key !== 'client_secret')),
       clientSecret: client.client_secret
     });
+    if (!registeredClientKey) throw oauthError('temporarily_unavailable', 'OAuth client capacity has been reached.');
     this.logger.info(`[fenix-mcp] OAuth client registered (${authMethod})`);
     return client;
   }
@@ -230,8 +238,13 @@ export class FenixOAuthServer {
     }
     const metadataGrantTypes = doc.grant_types || ['authorization_code', 'refresh_token'];
     const metadataResponseTypes = doc.response_types || ['code'];
-    if (!Array.isArray(metadataGrantTypes) || !metadataGrantTypes.includes('authorization_code') || metadataGrantTypes.some((grant) => !['authorization_code', 'refresh_token'].includes(grant)) ||
-        !Array.isArray(metadataResponseTypes) || metadataResponseTypes.length !== 1 || metadataResponseTypes[0] !== 'code') return null;
+    if (!Array.isArray(metadataGrantTypes) || !metadataGrantTypes.includes('authorization_code') ||
+        metadataGrantTypes.some((grant) => typeof grant !== 'string' || !grant) ||
+        !Array.isArray(metadataResponseTypes) || !metadataResponseTypes.includes('code') ||
+        metadataResponseTypes.some((responseType) => typeof responseType !== 'string' || !responseType)) {
+      this.logger.error(`[fenix-mcp] oauth: unsupported metadata grants or response types ref=${sha256Hex(url).slice(0, 12)}`);
+      return null;
+    }
     const metadataAuthMethod = doc.token_endpoint_auth_method || 'none';
     if (!['none', 'private_key_jwt'].includes(metadataAuthMethod)) return null;
     if (metadataAuthMethod === 'private_key_jwt' && (doc.token_endpoint_auth_signing_alg || 'RS256') !== 'RS256') return null;
@@ -244,8 +257,10 @@ export class FenixOAuthServer {
       token_endpoint_auth_methods_supported: [metadataAuthMethod],
       token_endpoint_auth_signing_alg: doc.token_endpoint_auth_signing_alg || 'RS256',
       jwks_uri: doc.jwks_uri || '',
-      grant_types: metadataGrantTypes,
-      response_types: metadataResponseTypes,
+      // A client may declare extension grants/response types that this server
+      // does not implement. Keep only the capabilities used by this MCP flow.
+      grant_types: metadataGrantTypes.filter((grant) => ['authorization_code', 'refresh_token'].includes(grant)),
+      response_types: ['code'],
       client_name: doc.client_name || ''
     };
     let jwks = null;
@@ -269,8 +284,8 @@ export class FenixOAuthServer {
       jwksSha256: jwksDigest
     });
     if (!registration.approved) return null;
-    this.clientDocs.set(url, { client, sha256: fetched.sha256 });
-    if (jwks) this.jwksCache.set(`${client.jwks_uri}\n${jwksDigest}`, jwks);
+    cacheSetBounded(this.clientDocs, url, { client, sha256: fetched.sha256 });
+    if (jwks) cacheSetBounded(this.jwksCache, `${client.jwks_uri}\n${jwksDigest}`, jwks);
     return { ...client, client_key: registration.clientKey, client_kind: 'metadata_document' };
   }
 
@@ -288,7 +303,7 @@ export class FenixOAuthServer {
     try {
       const fetched = await this.fetchJsonDocument(uri, MAX_JWKS_BYTES);
       if (!fetched || (expectedSha256 && fetched.sha256 !== expectedSha256)) return null;
-      this.jwksCache.set(cacheKey, fetched);
+      cacheSetBounded(this.jwksCache, cacheKey, fetched);
       return fetched.value;
     } catch (error) {
       this.logger.error(`[fenix-mcp] oauth: failed to fetch JWKS ref=${sha256Hex(uri).slice(0, 12)} reason=${error.message}`);
@@ -398,7 +413,12 @@ export class FenixOAuthServer {
     if (!client.redirect_uris.includes(redirect_uri)) return { type: 'html', status: 400, body: this.errorPage('invalid_request', 'redirect_uri is not registered for this client.').body };
     if (resource !== this.resource()) return { type: 'html', status: 400, body: this.errorPage('invalid_resource', 'The exact Fenix MCP resource URI is required.').body };
     if (response_type !== 'code') return { type: 'html', status: 400, body: this.errorPage('unsupported_response_type', 'Only the authorization code response type is supported.').body };
-    if (scope) return { type: 'html', status: 400, body: this.errorPage('invalid_scope', 'This MCP server does not currently define OAuth scopes.').body };
+    if (scope && scope.split(/\s+/).filter(Boolean).some((value) => value !== 'offline_access')) {
+      return { type: 'html', status: 400, body: this.errorPage('invalid_scope', 'Only the offline_access scope is supported.').body };
+    }
+    if (scope?.split(/\s+/).includes('offline_access') && !client.grant_types?.includes('refresh_token')) {
+      return { type: 'html', status: 400, body: this.errorPage('invalid_scope', 'This OAuth client is not registered for refresh tokens.').body };
+    }
     if (typeof code_challenge !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(code_challenge) || code_challenge_method !== 'S256') return { type: 'html', status: 400, body: this.errorPage('invalid_request', 'A valid PKCE S256 challenge is required.').body };
 
     const html = `<!doctype html>
@@ -452,6 +472,11 @@ export class FenixOAuthServer {
     if (!client.redirect_uris.includes(redirect_uri)) return { type: 'html', status: 400, body: this.errorPage('invalid_request', 'redirect_uri is not registered.').body };
     if (resource !== this.resource()) return { type: 'html', status: 400, body: this.errorPage('invalid_resource', 'The exact Fenix MCP resource URI is required.').body };
     if (response_type !== 'code') return { type: 'html', status: 400, body: this.errorPage('unsupported_response_type', 'Only the authorization code response type is supported.').body };
+    const requestedScopes = typeof body.scope === 'string' ? body.scope.split(/\s+/).filter(Boolean) : [];
+    if (requestedScopes.some((value) => value !== 'offline_access') ||
+        (requestedScopes.includes('offline_access') && !client.grant_types?.includes('refresh_token'))) {
+      return { type: 'html', status: 400, body: this.errorPage('invalid_scope', 'Only offline_access is supported when the client is registered for refresh tokens.').body };
+    }
     if (typeof code_challenge !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(code_challenge) || code_challenge_method !== 'S256') return { type: 'html', status: 400, body: this.errorPage('invalid_request', 'A valid PKCE S256 challenge is required.').body };
     if (typeof email !== 'string' || !email.trim() || email.length > 320 || typeof password !== 'string' || !password || password.length > 1024 || typeof hcaptcha_token !== 'string' || !hcaptcha_token || hcaptcha_token.length > 20_000) {
       return { type: 'html', status: 400, body: this.errorPage('invalid_request', 'Email, senha e confirmação hCaptcha são obrigatórios.').body };

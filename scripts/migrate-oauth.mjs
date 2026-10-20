@@ -15,7 +15,7 @@ if (!connectionString) {
 const client = new Client({ connectionString, connectionTimeoutMillis: 5000 });
 try {
   await client.connect();
-  for (const file of ['sql/000_oauth_roles.sql', 'sql/001_oauth_store.sql']) {
+  for (const file of ['sql/000_oauth_roles.sql', 'sql/001_oauth_store.sql', 'sql/002_api_failure_log.sql']) {
     await client.query(await readFile(resolve(root, file), 'utf8'));
     console.log(`Applied ${file}`);
   }
@@ -27,7 +27,7 @@ try {
   ]) {
     const password = process.env[variable];
     if (!password) continue;
-    const { rows } = await client.query("SELECT format('ALTER ROLE %I PASSWORD %L', $1, $2) AS statement", [role, password]);
+    const { rows } = await client.query("SELECT format('ALTER ROLE %I PASSWORD %L', $1::text, $2::text) AS statement", [role, password]);
     await client.query(rows[0].statement);
     console.log(`Set password for ${role}`);
   }

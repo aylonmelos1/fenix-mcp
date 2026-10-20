@@ -39,6 +39,11 @@ export function loadConfig() {
   if (fenixBase.protocol !== 'https:' || fenixBase.username || fenixBase.password || fenixBase.search || fenixBase.hash) {
     throw new Error('FENIX_BASE_URL must be HTTPS without credentials, query, or fragment');
   }
+  const fenixProxyToken = process.env.FENIX_PROXY_TOKEN || '';
+  const usesCloudflareFenixProxy = fenixBase.origin === publicUrl.origin;
+  if (usesCloudflareFenixProxy && !fenixProxyToken) {
+    throw new Error('FENIX_PROXY_TOKEN is required when FENIX_BASE_URL uses MCP_PUBLIC_URL');
+  }
 
   const bindHost = process.env.MCP_HTTP_HOST || '127.0.0.1';
   const port = intEnv('MCP_HTTP_PORT', 3000, { min: 1, max: 65535 });
@@ -63,6 +68,7 @@ export function loadConfig() {
   return {
     fenix: {
       baseUrl: fenixBase.origin,
+      proxyToken: usesCloudflareFenixProxy ? fenixProxyToken : '',
       frontendVersion: process.env.FENIX_FRONTEND_VERSION || '2.19.1',
       hcaptchaSiteKey: process.env.FENIX_HCAPTCHA_SITEKEY || 'e94868de-18ba-4314-b0ce-c7c84a1440b6',
       timeoutMs: intEnv('FENIX_TIMEOUT_MS', 30_000, { min: 1000, max: 300_000 }),

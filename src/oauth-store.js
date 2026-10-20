@@ -1,9 +1,10 @@
 import pg from 'pg';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { OAuthCrypto } from './oauth-crypto.js';
 
 const { Pool } = pg;
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
+const MAX_CLIENT_IDENTITIES = 1000;
 const ACCESS_TTL_MS = 60 * 60 * 1000;
 const REFRESH_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 const REPLAY_TTL_MS = 30 * 1000;
@@ -87,6 +88,96 @@ export class PgOAuthStore {
     }
   }
 
+  async recordApiFailure({ grantKey, operationId, method, pathTemplate, httpStatus, errorCode, errorName, validationFields, responseKeys, responseContentType, responseBodyType, outcome }) {
+    const client = await this.pool.connect().catch((error) => { throw new OAuthStoreError('OAuth database is unavailable', error); });
+    const incidentId = randomUUID();
+    try {
+      await client.query(
+        `INSERT INTO fenix_oauth.fenix_api_failures (
+           incident_id, grant_key, operation_id, method, path_template, http_status,
+           error_code, error_name, validation_fields, response_keys,
+           response_content_type, response_body_type, outcome
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb, $11, $12, $13)`,
+        [incidentId, grantKey, operationId, method, pathTemplate, httpStatus ?? null,
+          errorCode || 'unknown_error', errorName || 'Error', JSON.stringify(validationFields || []),
+          JSON.stringify(responseKeys || []), responseContentType || null, responseBodyType || null, outcome]
+      );
+      return incidentId;
+    } catch (error) {
+      throw new OAuthStoreError('Could not record the Fenix API failure', error);
+    } finally {
+      client.release();
+    }
+  }
+
+  async listApiFailures(grantKey, { operationId, limit, offset }) {
+    const client = await this.pool.connect().catch((error) => { throw new OAuthStoreError('OAuth database is unavailable', error); });
+    try {
+      const values = [grantKey];
+      const operationFilter = operationId ? `AND i.operation_id = $${values.push(operationId)}` : '';
+      const count = await client.query(
+        `SELECT count(*)::int AS total FROM fenix_oauth.fenix_api_failures i WHERE i.grant_key = $1 ${operationFilter}`,
+        values
+      );
+      const rows = await client.query(
+        `SELECT i.incident_id, i.occurred_at, i.operation_id, i.method, i.path_template,
+                i.http_status, i.error_code, i.error_name, i.validation_fields, i.response_keys,
+                i.response_content_type, i.response_body_type, i.outcome,
+                COALESCE(jsonb_agg(jsonb_build_object(
+                  'createdAt', r.created_at,
+                  'goalSummary', r.goal_summary,
+                  'stepsAttempted', r.steps_attempted,
+                  'observedResult', r.observed_result,
+                  'analysis', r.analysis,
+                  'recommendedNextStep', r.recommended_next_step
+                ) ORDER BY r.created_at) FILTER (WHERE r.report_id IS NOT NULL), '[]'::jsonb) AS reports
+         FROM fenix_oauth.fenix_api_failures i
+         LEFT JOIN fenix_oauth.fenix_api_failure_reports r
+           ON r.incident_id = i.incident_id AND r.grant_key = i.grant_key
+         WHERE i.grant_key = $1 ${operationFilter}
+         GROUP BY i.incident_id
+         ORDER BY i.occurred_at DESC
+         LIMIT $${values.push(limit)} OFFSET $${values.push(offset)}`,
+        values
+      );
+      return { total: count.rows[0]?.total || 0, incidents: rows.rows };
+    } catch (error) {
+      throw new OAuthStoreError('Could not read Fenix API failures', error);
+    } finally {
+      client.release();
+    }
+  }
+
+  async addApiFailureReport({ incidentId, grantKey, goalSummary, stepsAttempted, observedResult, analysis, recommendedNextStep }) {
+    return this.withTransaction(async (tx) => {
+      const incident = await tx.query(
+        'SELECT incident_id FROM fenix_oauth.fenix_api_failures WHERE incident_id = $1 AND grant_key = $2 FOR UPDATE',
+        [incidentId, grantKey]
+      );
+      if (!incident.rows.length) throw new OAuthStoreOperationError('Failure incident was not found for this Fenix connection');
+      const count = await tx.query(
+        'SELECT count(*)::int AS total FROM fenix_oauth.fenix_api_failure_reports WHERE incident_id = $1 AND grant_key = $2',
+        [incidentId, grantKey]
+      );
+      if (count.rows[0].total >= 10) throw new OAuthStoreOperationError('This incident already has the maximum number of reports');
+      await tx.query(
+        `INSERT INTO fenix_oauth.fenix_api_failure_reports (
+           incident_id, grant_key, goal_summary, steps_attempted, observed_result, analysis, recommended_next_step
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [incidentId, grantKey, goalSummary, stepsAttempted, observedResult, analysis || '', recommendedNextStep]
+      );
+      return { incidentId, recorded: true };
+    });
+  }
+
+  async pruneApiFailures() {
+    try {
+      await this.pool.query("DELETE FROM fenix_oauth.fenix_api_failures WHERE occurred_at < clock_timestamp() - interval '180 days'");
+    } catch (error) {
+      throw new OAuthStoreError('Could not prune expired Fenix API failures', error);
+    }
+  }
+
   clientKey(clientId) {
     return this.crypto.hash(clientId);
   }
@@ -109,6 +200,18 @@ export class PgOAuthStore {
 
   async lockClient(tx, clientKey) {
     await tx.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 77121))', [clientKey]);
+  }
+
+  async ensureClientCapacity(tx, clientId) {
+    let existing = await this.queryIdentity(tx, clientId);
+    if (existing) return { existing, capacityReached: false };
+
+    await this.lockClient(tx, 'oauth-client-capacity');
+    existing = await this.queryIdentity(tx, clientId);
+    if (existing) return { existing, capacityReached: false };
+
+    const { rows } = await tx.query('SELECT count(*)::int AS total FROM fenix_oauth.oauth_client_identities');
+    return { existing: null, capacityReached: rows[0].total >= MAX_CLIENT_IDENTITIES };
   }
 
   async queryIdentity(tx, clientId, { forUpdate = false } = {}) {
@@ -170,7 +273,8 @@ export class PgOAuthStore {
 
   async registerClient({ clientId, kind, data, clientSecret }) {
     return this.withTransaction(async (tx) => {
-      const existing = await this.queryIdentity(tx, clientId);
+      const { existing, capacityReached } = await this.ensureClientCapacity(tx, clientId);
+      if (capacityReached) return null;
       const key = existing?.client_key || this.clientKey(clientId);
       await this.lockClient(tx, key);
       if (existing && existing.client_kind !== kind) throw new OAuthStoreOperationError('OAuth client identity kind is immutable');
@@ -193,7 +297,8 @@ export class PgOAuthStore {
 
   async registerMetadata({ clientId, client, documentSha256, jwksSha256, provenance = 'initial-tls-fetch' }) {
     return this.withTransaction(async (tx) => {
-      const existing = await this.queryIdentity(tx, clientId);
+      const { existing, capacityReached } = await this.ensureClientCapacity(tx, clientId);
+      if (capacityReached) return { clientKey: null, approved: false, capacityReached: true };
       const key = existing?.client_key || this.clientKey(clientId);
       await this.lockClient(tx, key);
       if (existing && existing.client_kind !== 'metadata_document') throw new OAuthStoreOperationError('OAuth client identity kind is immutable');
