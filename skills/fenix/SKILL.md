@@ -17,6 +17,135 @@ Use esta Skill quando precisar consultar ou, quando o usuário pedir explicitame
 6. Confira `ok`, `status`, `operationId` e `error` no resultado. Um `422` indica parâmetros de consulta ou corpo ausentes/inválidos; use `validationFields` ou, se não vierem, `responseKeys` como nomes de campos, nunca como valores. Confirme os valores na tela correspondente ou em contexto autorizado; não os invente. Um `401` ou `419` indica sessão expirada e requer reconexão. Não repita chamadas sem mudar o dado que causou a falha.
 7. Alguns clientes MCP não carregam a extensão Skills nem recursos Markdown. Nesses clientes, siga estas regras e as instruções incluídas na inicialização e na descrição das ferramentas.
 
+## Fluxos Passo a Passo (Conforme a Tela do Fênix)
+
+Esta seção documenta a ordem exata das chamadas e os campos obrigatórios para os fluxos operacionais mais comuns do sistema Fênix CBMBA, espelhando o comportamento das telas do sistema.
+
+### Fluxo 1 — Consultar Usuário Logado, Edificações e Solicitações
+
+Para consultar os dados do solicitante, seus imóveis vinculados e o andamento de seus processos:
+
+1. **Passo 1 — Consultar dados do solicitante logado**:
+   - Chame `get_detailsrequester` (`GET /api/v1/detailsRequester`).
+   - Retorna os dados do solicitante:
+     - `user.id`: identificador numérico do usuário (`usuario_id`), necessário para associar edificações e projetos.
+     - `user.type_person`: tipo de pessoa (`"F"` para pessoa física ou `"J"` para pessoa jurídica).
+     - `user.pessoa_fisica` ou `user.pessoa_juridica`: dados cadastrais (CPF/CNPJ, nome, contatos).
+2. **Passo 2 — Listar edificações do solicitante**:
+   - Chame `get_usuarios_param_edifications` (`GET /api/v1/usuarios/{param1}/edifications`) com `path_parameters: { "param1": String(user.id) }`.
+   - **IMPORTANTE**: Nunca utilize a rota `get_edifications` (`GET /api/v1/edifications`), pois ela retorna HTTP 404 no Fênix. O Fênix vincula edificações diretamente ao usuário solicitante.
+3. **Passo 3 — Listar solicitações e processos em andamento**:
+   - Chame `get_request` (`GET /api/v1/request`) para listar solicitações gerais de serviço e vistorias.
+   - Chame `get_technicalproject` (`GET /api/v1/technicalproject`) para listar processos de projetos técnicos (PTS, PT, etc.).
+
+---
+
+### Fluxo 2 — Classificar CNAE, Ocupação, Divisão e Risco
+
+Para determinar o grau de risco de incêndio, ocupação e divisão a partir da atividade econômica:
+
+1. **Passo 1 — Buscar o CNAE**:
+   - Chame `get_cnaes` (`GET /api/v1/cnaes`) com `query: { "categoria": "codigo", "codigo": "6201501" }`.
+   - **Regra**: O código deve conter exatamente 7 dígitos numéricos, sem pontos, barras ou traços (o WAF do Fênix bloqueia caracteres especiais com HTTP 500).
+2. **Passo 2 — Extrair os dados de classificação**:
+   - Do registro retornado, extraia:
+     - `id`: identificador do CNAE no Fênix (`cnae_id`).
+     - `division.group_occupation_id`: identificador do grupo de ocupação (ex.: Grupo C — Comercial, Grupo D — Serviços).
+     - `division.id`: identificador da divisão (ex.: D-1, C-2).
+     - `risco`: classificação de risco (ou intervalo `[min_risco, max_risco]`), definindo se a edificação se enquadra em Baixo, Médio ou Alto Risco.
+
+---
+
+### Fluxo 3 — Cadastrar Edificação (`post_edifications` / `put_edifications_param`)
+
+Para cadastrar um novo imóvel ou atualizar uma edificação existente:
+
+1. **Passo 1 — Obter o ID do solicitante**:
+   - Chame `get_detailsrequester` (`GET /api/v1/detailsRequester`) e recupere `user.id`.
+2. **Passo 2 — Obter o município e código Fênix**:
+   - Chame `get_counties` (`GET /api/v1/counties`) para identificar o município da edificação:
+     - `id` -> `municipio_id` (ex.: `423`)
+     - `municipio` -> `county` (ex.: `"SALVADOR"`)
+3. **Passo 3 — Enviar a criação da edificação**:
+   - Chame `post_edifications` (`POST /api/v1/edifications`) via `fenix_api_call` com `confirm_mutation: true`.
+   - **Estrutura do `body`**: O objeto JSON deve ser enviado na **raiz do body** (sem envolver em uma chave `dados`):
+     - `reference_name`: string (nome de referência da edificação)
+     - `registration`: string (inscrição imobiliária / IPTU, ou `""` se não houver)
+     - `registration_zip_code`: string no formato `"${registration}-${zip_code}"` (ex.: `"12345678-41820021"`)
+     - `height`: string obrigatória do enum do Fênix (NÃO é número livre):
+       - `"Térrea = Um pavimento"` (obriga `number_floors: 1`)
+       - `"Baixa = H <= 6,00 m"`
+       - `"Baixa-Média = 6,00 m < H <= 12,00 m"`
+       - `"Média = 12,00 m < H <= 23,00 m"`
+       - `"Medianamente Alta = 23,00 m < H <= 30,00 m"`
+       - `"Alta = Acima de 30,00 m"`
+     - `number_floors`: integer (nº de pavimentos; em PTS/CLCB deve ser `<= 3`)
+     - `building_area`: number (área construída existente em m²)
+     - `area_to_be_built`: number (área a construir em m², ex.: `0`)
+     - `discount_area`: number (área de desconto em m², ex.: `0`)
+     - `total_area`: number (calculado como `building_area + area_to_be_built - discount_area`)
+     - `solicitante`: `{ "id": <user.id> }`
+     - `address`: objeto com dados de endereço:
+       ```json
+       {
+         "zip_code": "41820021",
+         "public_place": "Avenida Tancredo Neves",
+         "number": "123",
+         "complement": "Sala 401",
+         "district": "Caminho das Árvores",
+         "county": "SALVADOR",
+         "municipio_id": 423,
+         "state": "BA",
+         "geographic_coordinates": "-12.9812,-38.4556"
+       }
+       ```
+   - Para atualizar uma edificação existente, use `put_edifications_param` com `path_parameters: { "param1": String(edificacao_id) }` e os mesmos campos atualizados no body.
+
+---
+
+### Fluxo 4 — Cadastrar Projeto Técnico / CLCB / AVCB (`post_technicalproject` + `post_gerarnumerosolicitacao`)
+
+O cadastro de projetos técnicos (PTS para CLCB ou PT para AVCB) ocorre em duas etapas encadeadas:
+
+1. **Passo 1 — Cadastrar o Projeto Técnico (`post_technicalproject`)**:
+   - Chame `post_technicalproject` (`POST /api/v1/technicalproject`) com `confirm_mutation: true`.
+   - Parâmetros no body:
+     - `tipo_projeto_id`: integer correspondente à modalidade de projeto:
+       - `1`: Projeto Técnico (PT — AVCB para edificações de maior risco/porte)
+       - `2`: Projeto Técnico Simplificado (PTS — CLCB até 750 m² e até 3 pavimentos)
+       - `3`: Projeto Técnico para Instalação e Ocupação Temporária (PTIOT — eventos)
+       - `4`: Projeto Técnico para Ocupação Temporária em Edificação Permanente (PTOTEP)
+       - `5`: Projeto Técnico Especial (PTE)
+       - `6`: Plano de Emergência (PE)
+       - `7`: Substituição de Projeto Técnico Aprovado
+       - `8`: Retificação de Projeto Técnico Aprovado
+     - `edificacao_id`: integer com o ID de uma edificação existente ou a string `"new"` para cadastrar junto.
+     - Demais dados da ocupação, CNAE e dados do responsável técnico / solicitante.
+   - O Fênix cria o registro e retorna o objeto contendo o `id` do projeto técnico (`projeto_tecnico_id`).
+
+2. **Passo 2 — Gerar o Número Oficial da Solicitação / Protocolo SAP (`post_gerarnumerosolicitacao`)**:
+   - Chame `post_gerarnumerosolicitacao` (`POST /api/v1/gerarNumeroSolicitacao`) com `confirm_mutation: true`.
+   - Envie no body:
+     ```json
+     {
+       "projeto_tecnico_id": <projeto_tecnico_id>
+     }
+     ```
+   - O Fênix gera o número oficial de protocolo/solicitação SAP vinculando o projeto técnico para tramitação e vistoria.
+
+---
+
+### Fluxo 5 — Consultar ou Cadastrar Declaração de Inexigibilidade
+
+Para atividades ou eventos dispensados de vistoria prévia e licenciamento:
+
+1. **Consulta de Inexigibilidades**:
+   - Chame `get_inexigibilidades` (`GET /api/v1/inexigibilidades`) com filtros opcionais em query (`status`, `n_protocolo_sap`, `cpfcnpj`, `page`, `perPage`).
+2. **Cadastro de Inexigibilidade**:
+   - Chame `post_inexigibilidades` (`POST /api/v1/inexigibilidades`) com `confirm_mutation: true`, informando `edificacao_id`, `dados_evento` e `termo_responsabilidade: true`.
+3. **Emissão e Download do Certificado**:
+   - Chame `get_inexigibilidades_param_certificado_download` (`GET /api/v1/inexigibilidades/{param1}/certificado/download`) com `path_parameters: { "param1": String(inexigibilidade_id) }` para baixar o certificado em PDF emitido pelo CBMBA.
+
 ## Limites e privacidade
 
 - Para pedidos de consulta, não chame `POST`, `PUT`, `PATCH` ou `DELETE`, mesmo quando a classificação heurística disser `read-only`. Não defina `confirm_mutation`.
