@@ -74,12 +74,52 @@ function visibleOperation(operation, frontendVersion) {
   return unavailableReason(operation, frontendVersion) === undefined;
 }
 
+function hasValue(val) {
+  if (val === undefined || val === null) return false;
+  if (typeof val === 'string') return val.trim().length > 0;
+  if (Array.isArray(val)) return val.length > 0;
+  if (typeof val === 'object') return Object.keys(val).length > 0;
+  return true;
+}
+
+function stringifySearchValue(val) {
+  if (!val) return '';
+  if (typeof val === 'string') return val;
+  try {
+    return JSON.stringify(val);
+  } catch {
+    return String(val);
+  }
+}
+
+function operationSearchText(operation) {
+  return [
+    operation.id,
+    operation.method,
+    operation.path,
+    operation.description,
+    operation.pathParameterHints,
+    operation.queryParameters,
+    operation.bodyParameters,
+    operation.notes
+  ]
+    .map(stringifySearchValue)
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+}
+
 function compactOperation(operation, frontendVersion) {
   return {
     id: operation.id,
     method: operation.method,
     path: operation.path,
+    ...(hasValue(operation.description) ? { description: operation.description } : {}),
     pathParameters: operation.pathParameters,
+    ...(hasValue(operation.pathParameterHints) ? { pathParameterHints: operation.pathParameterHints } : {}),
+    ...(hasValue(operation.queryParameters) ? { queryParameters: operation.queryParameters } : {}),
+    ...(hasValue(operation.bodyParameters) ? { bodyParameters: operation.bodyParameters } : {}),
+    ...(hasValue(operation.notes) ? { notes: operation.notes } : {}),
     access: operation.access,
     sourceCallCount: operation.sourceCallCount,
     observedInChrome: operation.observedInChrome,
@@ -190,9 +230,11 @@ export function buildMcpServer({ client, operations, frontendVersion, skillMarkd
   server.registerTool(
     'fenix_list_endpoints',
     {
-      description: 'Lista operações encontradas no frontend Fênix. Para consultas, filtre method=GET e access=read-only; a classificação de acesso é heurística. Use a Skill skill://fenix/SKILL.md para preencher path_parameters/query e interpretar erros.',
+      description: 'Lista operações encontradas no frontend Fênix com metadados detalhados (description, pathParameterHints, queryParameters, bodyParameters e notes). Para consultas, filtre method=GET e access=read-only; a classificação de acesso é heurística. Para inspecionar parâmetros de operações específicas diretamente, use operation_id ou operation_ids. Use a Skill skill://fenix/SKILL.md para preencher path_parameters/query e interpretar erros.',
       inputSchema: z.object({
         search: z.string().max(120).optional(),
+        operation_id: z.string().max(160).optional(),
+        operation_ids: z.array(z.string().max(160)).max(50).optional(),
         method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).optional(),
         access: z.enum(['read-only', 'mutating-or-unclear']).optional(),
         observed_in_chrome: z.boolean().optional(),
@@ -201,21 +243,33 @@ export function buildMcpServer({ client, operations, frontendVersion, skillMarkd
         offset: z.number().int().min(0).max(1000).default(0)
       })
     },
-    async ({ search, method, access, observed_in_chrome, include_unavailable, limit, offset }) => {
+    async ({ search, operation_id, operation_ids, method, access, observed_in_chrome, include_unavailable, limit, offset }) => {
+      const targetIds = new Set();
+      if (operation_id) targetIds.add(operation_id);
+      if (Array.isArray(operation_ids)) {
+        for (const id of operation_ids) {
+          if (id) targetIds.add(id);
+        }
+      }
+      const unknownOperationIds = targetIds.size > 0
+        ? [...targetIds].filter((id) => !byId.has(id))
+        : [];
       const normalized = (search || '').toLowerCase();
       const filtered = operations.filter((operation) =>
-        (include_unavailable || visibleOperation(operation, frontendVersion)) &&
+        (targetIds.size === 0 || targetIds.has(operation.id)) &&
+        (targetIds.size > 0 || include_unavailable || visibleOperation(operation, frontendVersion)) &&
         (!method || operation.method === method) &&
         (!access || operation.access === access) &&
         (observed_in_chrome === undefined || operation.observedInChrome === observed_in_chrome) &&
-        (!normalized || `${operation.id} ${operation.method} ${operation.path}`.toLowerCase().includes(normalized))
+        (!normalized || operationSearchText(operation).includes(normalized))
       );
       return success({
         frontendVersion,
         count: filtered.length,
         offset,
         limit,
-        endpoints: filtered.slice(offset, offset + limit).map((operation) => compactOperation(operation, frontendVersion))
+        endpoints: filtered.slice(offset, offset + limit).map((operation) => compactOperation(operation, frontendVersion)),
+        ...(unknownOperationIds.length > 0 ? { unknownOperationIds } : {})
       });
     }
   );

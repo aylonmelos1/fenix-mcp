@@ -10,11 +10,12 @@ Use esta Skill quando precisar consultar ou, quando o usuário pedir explicitame
 ## Fluxo de leitura
 
 1. Comece com `fenix_list_endpoints`, usando `method: "GET"` e `access: "read-only"`. O catálogo pode ter mais de uma página; use `offset` para continuar quando necessário.
-2. Escolha a operação pelo `id` e confira `method`, `path` e `pathParameters`. A marcação `access` é heurística; para uma consulta, chame somente operações `GET`.
-3. Preencha todos os nomes de `pathParameters` em `path_parameters` com identificadores válidos vindos de contexto autorizado. Não invente IDs nem use `0` como teste.
-4. Envie filtros em `query` apenas quando forem conhecidos pela tela ou pelo resultado de validação da API. Não envie `body` em operações `GET`.
-5. Confira `ok`, `status`, `operationId` e `error` no resultado. Um `422` indica parâmetros de consulta ausentes ou inválidos; use `validationFields` ou, se não vierem, `responseKeys` como nomes de campos, nunca como valores. Confirme os valores na tela correspondente ou em contexto autorizado; não os invente. Um `401` ou `419` indica sessão expirada e requer reconexão. Não repita chamadas sem mudar o dado que causou a falha.
-6. Alguns clientes MCP não carregam a extensão Skills nem recursos Markdown. Nesses clientes, siga estas regras e as instruções incluídas na inicialização e na descrição das ferramentas.
+2. Cada operação do catálogo inclui metadados enriquecidos (`description`, `pathParameterHints`, `queryParameters`, `bodyParameters` e `notes`). Se você já conhece ou identificou a operação desejada, utilize `operation_id` ou `operation_ids` em `fenix_list_endpoints` para inspecionar diretamente seus parâmetros e orientações antes de chamar `fenix_api_call`.
+3. Escolha a operação pelo `id` e confira `method`, `path`, `pathParameters` e `pathParameterHints`. A marcação `access` é heurística; para uma consulta, chame somente operações `GET`.
+4. Preencha todos os nomes de `pathParameters` em `path_parameters` com identificadores válidos vindos de contexto autorizado (consulte `pathParameterHints` para saber o significado do parâmetro, como ID de solicitação, documento ou usuário). Não invente IDs nem use `0` como teste.
+5. Monte `query` e `body` consultando as definições documentadas em `queryParameters`, `bodyParameters` e `notes` da operação. Envie filtros em `query` apenas quando forem conhecidos pelo catálogo, pela tela ou pelo resultado de validação da API. Não envie `body` em operações `GET`.
+6. Confira `ok`, `status`, `operationId` e `error` no resultado. Um `422` indica parâmetros de consulta ou corpo ausentes/inválidos; use `validationFields` ou, se não vierem, `responseKeys` como nomes de campos, nunca como valores. Confirme os valores na tela correspondente ou em contexto autorizado; não os invente. Um `401` ou `419` indica sessão expirada e requer reconexão. Não repita chamadas sem mudar o dado que causou a falha.
+7. Alguns clientes MCP não carregam a extensão Skills nem recursos Markdown. Nesses clientes, siga estas regras e as instruções incluídas na inicialização e na descrição das ferramentas.
 
 ## Limites e privacidade
 

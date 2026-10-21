@@ -7,6 +7,69 @@ const catalogPath = resolve(root, 'src/frontend-endpoints.json');
 const catalog = JSON.parse(await readFile(catalogPath, 'utf8'));
 const blocked = new Set(['/api/v1/password/email', '/api/v1/password/reset', '/api/v1/editPassword', '/api/v1/firstAcess']);
 const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+
+function hasValue(val) {
+  if (val === undefined || val === null) return false;
+  if (typeof val === 'string') return val.trim().length > 0;
+  if (Array.isArray(val)) return val.length > 0;
+  if (typeof val === 'object') return Object.keys(val).length > 0;
+  return true;
+}
+
+function escapeTableCell(text) {
+  return String(text)
+    .replace(/\|/g, '\\|')
+    .replace(/\r?\n+/g, '<br>');
+}
+
+function formatParameterEntry(val) {
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'string') return val;
+  if (Array.isArray(val)) {
+    return val.map((item) => (typeof item === 'object' && item !== null ? JSON.stringify(item) : String(item))).join(', ');
+  }
+  if (typeof val === 'object') {
+    return Object.entries(val)
+      .map(([k, v]) => {
+        if (v && typeof v === 'object') {
+          const typeStr = v.type ? ` (${v.type})` : '';
+          const descStr = v.description ? `: ${v.description}` : '';
+          return `\`${k}\`${typeStr}${descStr}`;
+        }
+        return `\`${k}\`${v ? `: ${v}` : ''}`;
+      })
+      .join('; ');
+  }
+  return String(val);
+}
+
+function formatOperationDetails(operation) {
+  const parts = [];
+  if (hasValue(operation.description)) {
+    parts.push(escapeTableCell(String(operation.description).trim()));
+  }
+  if (hasValue(operation.pathParameterHints)) {
+    parts.push(`**Path params:** ${escapeTableCell(formatParameterEntry(operation.pathParameterHints))}`);
+  }
+  if (hasValue(operation.queryParameters)) {
+    parts.push(`**Query:** ${escapeTableCell(formatParameterEntry(operation.queryParameters))}`);
+  }
+  if (hasValue(operation.bodyParameters)) {
+    parts.push(`**Body:** ${escapeTableCell(formatParameterEntry(operation.bodyParameters))}`);
+  }
+  if (hasValue(operation.notes)) {
+    const notesText = typeof operation.notes === 'string'
+      ? operation.notes
+      : Array.isArray(operation.notes)
+        ? operation.notes.join('; ')
+        : formatParameterEntry(operation.notes);
+    if (notesText.trim()) {
+      parts.push(`*Nota:* ${escapeTableCell(notesText.trim())}`);
+    }
+  }
+  return parts.length ? parts.join('<br>') : '-';
+}
+
 const lines = [
   '# Fênix frontend API catalog',
   '',
@@ -37,10 +100,11 @@ lines.push('', '## Operation templates', '');
 for (const method of methods) {
   const entries = catalog.operations.filter((entry) => entry.method === method).sort((a, b) => a.path.localeCompare(b.path));
   if (!entries.length) continue;
-  lines.push(`### ${method}`, '', '| Path | Operation ID | Heuristic | Browser capture | MCP tool |', '| --- | --- | --- | --- | --- |');
+  lines.push(`### ${method}`, '', '| Path | Operation ID | Heuristic | Browser capture | MCP tool | Description & Parameters |', '| --- | --- | --- | --- | --- | --- |');
   for (const entry of entries) {
     const available = !blocked.has(entry.path);
-    lines.push(`| \`${entry.path}\` | \`${entry.id}\` | ${entry.access} | ${entry.observedInChrome ? 'observed' : 'bundle only'} | ${available ? 'available' : 'excluded'} |`);
+    const details = formatOperationDetails(entry);
+    lines.push(`| \`${entry.path}\` | \`${entry.id}\` | ${entry.access} | ${entry.observedInChrome ? 'observed' : 'bundle only'} | ${available ? 'available' : 'excluded'} | ${details} |`);
   }
   lines.push('');
 }
