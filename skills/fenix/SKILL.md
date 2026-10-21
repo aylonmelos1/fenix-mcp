@@ -57,4 +57,11 @@ O catálogo foi extraído do frontend e de chamadas observadas no navegador. Ele
 
 No frontend Fênix `2.19.1`, `get_edifications` respondeu HTTP 404 e `get_solicitacoes_param_retificacoes` respondeu HTTP 405 usando um ID de solicitação retornado pelo próprio Fênix. As duas operações ficam fora da lista padrão e permanecem visíveis com `include_unavailable=true` para auditoria.
 
-Os erros 422 observados identificam estes nomes de campos para consultas, mas não informam valores válidos: `get_cnaes` → `categoria`; `get_remanejamentos_projeto_remanejavel` → `campo`, `valor`; `get_transferencias_solicitacoes_destinatarios` → `funcionario_origem_id`, `tipo_solicitacao`, `status_solicitacao`; `get_solicitacoes_param_fluxo_contexto_devolucao_com_designacao`, `get_solicitacoes_param_fluxo_contexto_devolucao_sem_designacao` e `get_solicitacoes_param_fluxo_funcionarios_p_encaminhamento` → `status_destino`.
+### Parâmetros de consulta conhecidos
+
+- `get_cnaes` (`GET /api/v1/cnaes`):
+  - `categoria: "codigo"` exigindo `codigo: "<7 dígitos numéricos sem traço ou barra, ex: 6201501>"` (nunca enviar `/` ou `-`, pois o WAF bloqueia com HTTP 500).
+  - `categoria: "evento"` (lista CNAEs de eventos temporários).
+  - `categoria: "fora-it14"` (lista CNAEs fora da IT 14).
+
+Os erros 422 observados identificam estes nomes de campos para consultas, mas não informam valores válidos: `get_remanejamentos_projeto_remanejavel` → `campo`, `valor`; `get_transferencias_solicitacoes_destinatarios` → `funcionario_origem_id`, `tipo_solicitacao`, `status_solicitacao`; `get_solicitacoes_param_fluxo_contexto_devolucao_com_designacao`, `get_solicitacoes_param_fluxo_contexto_devolucao_sem_designacao` e `get_solicitacoes_param_fluxo_funcionarios_p_encaminhamento` → `status_destino`.

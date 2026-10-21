@@ -102,7 +102,30 @@ function encodeQueryValue(value) {
   return typeof value === 'object' ? JSON.stringify(value) : String(value);
 }
 
-function operationUrl(baseUrl, operation, pathParameters = {}, query = {}) {
+export function normalizeOperationQuery(operation, query) {
+  if (!query || typeof query !== 'object') {
+    return query;
+  }
+  if (operation?.id === 'get_cnaes' || operation?.path === '/api/v1/cnaes') {
+    const next = { ...query };
+    if (next.codigo === undefined && next.cnae !== undefined) {
+      next.codigo = next.cnae;
+      delete next.cnae;
+    }
+    if (next.codigo !== undefined && next.codigo !== null) {
+      const digits = String(next.codigo).replace(/\D+/g, '');
+      if (digits) next.codigo = digits;
+      if (next.categoria === undefined || next.categoria === null || next.categoria === '') {
+        next.categoria = 'codigo';
+      }
+    }
+    return next;
+  }
+  return query;
+}
+
+export function operationUrl(baseUrl, operation, pathParameters = {}, query = {}) {
+  const normalizedQuery = normalizeOperationQuery(operation, query);
   let path = operation.path;
   for (const name of operation.pathParameters || []) {
     const value = pathParameters[name];
@@ -118,7 +141,7 @@ function operationUrl(baseUrl, operation, pathParameters = {}, query = {}) {
   if (url.origin !== new URL(baseUrl).origin || !url.pathname.startsWith(API_PREFIX)) {
     throw new FenixApiError('Operation URL failed origin validation.', { operationId: operation.id, code: 'invalid_operation' });
   }
-  for (const [key, value] of Object.entries(query || {})) {
+  for (const [key, value] of Object.entries(normalizedQuery || {})) {
     const encoded = encodeQueryValue(value);
     if (encoded !== undefined) url.searchParams.set(key, encoded);
   }
