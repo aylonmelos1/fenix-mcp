@@ -402,10 +402,17 @@ export class PgOAuthStore {
   async peekRefresh(refreshToken) {
     try {
       const { rows } = await this.pool.query(
-        `SELECT token_hash, client_key, resource, grant_id, expires_at, consumed_at, revoked_at
+        `SELECT token_hash, client_key, resource, grant_id, fenix_cipher, expires_at, consumed_at, revoked_at
          FROM fenix_oauth.oauth_refresh_tokens WHERE token_hash = ANY($1::text[]) LIMIT 1`, [this.crypto.lookupHashes(refreshToken)]
       );
-      return rows[0] || null;
+      if (!rows[0]) return null;
+      let fenix = null;
+      try {
+        fenix = this.crypto.decryptJson(rows[0].fenix_cipher);
+      } catch {
+        fenix = null;
+      }
+      return { ...rows[0], fenix };
     } catch (error) {
       throw new OAuthStoreError('OAuth refresh-token lookup failed', error);
     }
@@ -470,7 +477,7 @@ export class PgOAuthStore {
     });
   }
 
-  async rotateRefresh({ refreshToken, clientKey }) {
+  async rotateRefresh({ refreshToken, clientKey, fenix: updatedFenix }) {
     return this.withTransaction(async (tx) => {
       await this.lockClient(tx, clientKey);
       if (!await this.assertActive(tx, clientKey)) throw new OAuthStoreOperationError('OAuth client is revoked');
@@ -491,7 +498,14 @@ export class PgOAuthStore {
         }
         throw new OAuthStoreOperationError('Refresh token has already been used');
       }
-      const fenix = this.crypto.decryptJson(stored.fenix_cipher);
+      const fenix = updatedFenix && typeof updatedFenix === 'object' ? updatedFenix : this.crypto.decryptJson(stored.fenix_cipher);
+      if (updatedFenix && typeof updatedFenix === 'object') {
+        await tx.query(
+          `UPDATE fenix_oauth.oauth_access_tokens SET fenix_cipher = $2
+           WHERE grant_id = $1 AND revoked_at IS NULL AND expires_at > clock_timestamp()`,
+          [stored.grant_id, this.crypto.encryptJson(fenix)]
+        );
+      }
       const response = await this.insertTokenPair(tx, clientKey, fenix, stored.resource, stored.grant_id, true);
       const replayCipher = this.crypto.encryptJson(response);
       await tx.query(
@@ -567,6 +581,57 @@ export class PgOAuthStore {
          WHERE grant_id = $1 AND revoked_at IS NULL AND expires_at > clock_timestamp()`, [grantId, cipher]
       );
     });
+  }
+
+  async revokeGrantById(grantId) {
+    if (typeof grantId !== 'string' || !grantId) return false;
+    return this.withTransaction(async (tx) => {
+      await tx.query(
+        `UPDATE fenix_oauth.oauth_access_tokens SET revoked_at = clock_timestamp(), fenix_cipher = $2 WHERE grant_id = $1 AND revoked_at IS NULL`,
+        [grantId, this.emptySessionCipher]
+      );
+      await tx.query(
+        `UPDATE fenix_oauth.oauth_refresh_tokens SET revoked_at = clock_timestamp(), fenix_cipher = $2 WHERE grant_id = $1 AND revoked_at IS NULL`,
+        [grantId, this.emptySessionCipher]
+      );
+      return true;
+    });
+  }
+
+  async listActiveGrants({ limit = 200 } = {}) {
+    try {
+      const { rows } = await this.pool.query(
+        `SELECT DISTINCT ON (grant_id) grant_id, fenix_cipher, issued_at
+         FROM (
+           SELECT grant_id, fenix_cipher, issued_at
+           FROM fenix_oauth.oauth_refresh_tokens
+           WHERE revoked_at IS NULL AND consumed_at IS NULL AND expires_at > clock_timestamp()
+           UNION ALL
+           SELECT grant_id, fenix_cipher, issued_at
+           FROM fenix_oauth.oauth_access_tokens
+           WHERE revoked_at IS NULL AND expires_at > clock_timestamp()
+         ) active_tokens
+         ORDER BY grant_id, issued_at DESC
+         LIMIT $1`,
+        [limit]
+      );
+      const active = [];
+      for (const row of rows) {
+        let fenix = null;
+        try {
+          fenix = this.crypto.decryptJson(row.fenix_cipher);
+        } catch {
+          fenix = null;
+        }
+        if (Array.isArray(fenix?.cookieJar?.cookies) && fenix.cookieJar.cookies.length > 0) {
+          active.push({ grantId: row.grant_id, fenix });
+        }
+      }
+      return active;
+    } catch (error) {
+      if (error instanceof OAuthStoreError) throw error;
+      throw new OAuthStoreError('OAuth active grants lookup failed', error);
+    }
   }
 
   async claimClientAssertion(clientKey, jti, expiresAt) {

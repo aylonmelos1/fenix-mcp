@@ -155,7 +155,7 @@ function getLimiter(key, limit) {
 }
 
 export class FenixClient {
-  constructor({ baseUrl = 'https://fenix.cbm.ba.gov.br', proxyToken = '', timeoutMs = 30_000, rateLimitPerMinute = 60, maxRetries = 1, cookieJar, session, grantId, onSessionUpdate }) {
+  constructor({ baseUrl = 'https://fenix.cbm.ba.gov.br', proxyToken = '', timeoutMs = 30_000, rateLimitPerMinute = 60, maxRetries = 1, cookieJar, session, grantId, onSessionUpdate, onSessionExpired }) {
     const parsed = new URL(baseUrl);
     if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.search || parsed.hash) {
       throw new Error('FENIX_BASE_URL must be an HTTPS URL without credentials, query, or fragment');
@@ -169,8 +169,41 @@ export class FenixClient {
     this.jar = makeJar(this.session.cookieJar || cookieJar);
     this.grantId = grantId;
     this.onSessionUpdate = onSessionUpdate;
+    this.onSessionExpired = onSessionExpired;
     const sessionKey = createHash('sha256').update(JSON.stringify(this.session.cookieJar)).digest('hex');
     this.limiter = getLimiter(sessionKey, rateLimitPerMinute);
+  }
+
+  async persistSessionIfChanged(previousCookieJar, force = false) {
+    const nextCookieJar = this.jar.serializeSync();
+    if (force || JSON.stringify(nextCookieJar) !== previousCookieJar) {
+      this.session.cookieJar = nextCookieJar;
+      if (this.grantId && this.onSessionUpdate) {
+        await this.onSessionUpdate(this.grantId, this.session);
+      }
+    }
+  }
+
+  async refreshCsrf(signal) {
+    await this.limiter.acquire();
+    const csrfUrl = new URL('/api/v1/csrf-cookie', this.origin);
+    const csrfResponse = await fetchWithTimeout(csrfUrl, {
+      method: 'GET',
+      headers: proxyHeaders({
+        Accept: 'application/json',
+        Origin: this.origin,
+        Referer: `${this.origin}/`,
+        Cookie: this.jar.getCookieStringSync(csrfUrl.toString())
+      }, this.proxyToken),
+      redirect: 'manual',
+      signal
+    }, this.timeoutMs);
+    const previousCookieJar = JSON.stringify(this.session.cookieJar);
+    await setCookies(csrfResponse, csrfUrl.toString(), this.jar);
+    await csrfResponse.body?.cancel().catch(() => {});
+    await this.persistSessionIfChanged(previousCookieJar).catch(() => {});
+    if ([401, 302, 303].includes(csrfResponse.status)) return false;
+    return csrfResponse.ok || csrfResponse.status === 204;
   }
 
   static async login({ baseUrl = 'https://fenix.cbm.ba.gov.br', proxyToken = '', timeoutMs = 30_000, email, password, hcaptchaToken, version = '2.19.1' }) {
@@ -231,6 +264,11 @@ export class FenixClient {
       }
     }
 
+    if (mutating && !csrfHeader(this.jar, url.toString())) {
+      await this.refreshCsrf(signal).catch(() => false);
+    }
+    let csrfRetried = false;
+
     for (let attempt = 0; ; attempt += 1) {
       await this.limiter.acquire();
       const headers = {
@@ -261,15 +299,22 @@ export class FenixClient {
 
       const previousCookieJar = JSON.stringify(this.session.cookieJar);
       await setCookies(response, url.toString(), this.jar);
-      const nextCookieJar = this.jar.serializeSync();
-      if (JSON.stringify(nextCookieJar) !== previousCookieJar) {
-        this.session.cookieJar = nextCookieJar;
-        if (this.grantId && this.onSessionUpdate) {
-          try { await this.onSessionUpdate(this.grantId, this.session); }
-          catch { throw new FenixApiError('Could not persist the refreshed Fenix session. Retry the request.', { method, operationId: operation.id, code: 'session_persist_failed' }); }
-        }
+      try {
+        await this.persistSessionIfChanged(previousCookieJar);
+      } catch {
+        throw new FenixApiError('Could not persist the refreshed Fenix session. Retry the request.', { method, operationId: operation.id, code: 'session_persist_failed' });
+      }
+      if (response.status === 419 && !csrfRetried) {
+        csrfRetried = true;
+        await response.body?.cancel().catch(() => {});
+        const refreshed = await this.refreshCsrf(signal).catch(() => false);
+        if (refreshed) continue;
       }
       if ([401, 419].includes(response.status) || response.status === 302 || response.status === 303) {
+        await response.body?.cancel().catch(() => {});
+        if (this.grantId && this.onSessionExpired) {
+          await this.onSessionExpired(this.grantId).catch(() => {});
+        }
         throw new FenixApiError('Fenix session expired. Reconnect the MCP account.', { status: response.status, method, operationId: operation.id, code: 'session_expired' });
       }
       if ([429, 502, 503, 504].includes(response.status) && method === 'GET' && attempt < this.maxRetries) {
@@ -306,6 +351,23 @@ export class FenixClient {
         operationId: operation.id,
         data: parsePayload(text, response.headers.get('content-type'))
       };
+    }
+  }
+
+  async keepAlive({ signal } = {}) {
+    try {
+      await this.refreshCsrf(signal).catch(() => false);
+      await this.request({ operation: { id: 'get_unity', method: 'GET', path: '/api/v1/unity', pathParameters: [] }, signal });
+      this.session.lastKeepAliveAt = new Date().toISOString();
+      if (this.grantId && this.onSessionUpdate) {
+        await this.onSessionUpdate(this.grantId, this.session);
+      }
+      return { alive: true, session: this.session };
+    } catch (error) {
+      if (error?.code === 'session_expired') {
+        return { alive: false, expired: true };
+      }
+      return { alive: false, expired: false, error };
     }
   }
 }

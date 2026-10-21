@@ -497,6 +497,7 @@ export class FenixOAuthServer {
 
     const code = rand(32);
     const now = Date.now();
+    const nowIso = new Date().toISOString();
     try {
       await this.store.insertCode({
         code,
@@ -505,7 +506,7 @@ export class FenixOAuthServer {
         codeChallenge: code_challenge,
         codeChallengeMethod: 'S256',
         resource,
-        fenix: { cookieJar: session.cookieJar, authenticatedAt: new Date().toISOString() },
+        fenix: { cookieJar: session.cookieJar, authenticatedAt: nowIso, lastKeepAliveAt: nowIso },
         expiresAt: now + AUTH_CODE_TTL_MS
       });
     } catch (error) {
@@ -582,6 +583,22 @@ export class FenixOAuthServer {
     if (!client || client.client_key !== stored.client_key) throw oauthError('invalid_client', 'Client does not match the refresh token.');
     if (body.resource !== this.resource() || stored.resource !== this.resource()) throw oauthError('invalid_grant', 'resource does not match the refresh token.');
     await this.authenticateClient(body, headers, client);
+    if (!stored.consumed_at && typeof this.fenixKeepAlive === 'function' && stored.fenix?.cookieJar) {
+      const lastPing = Date.parse(stored.fenix.lastKeepAliveAt || '');
+      const needsCheck = !Number.isFinite(lastPing) || (Date.now() - lastPing) > 5 * 60 * 1000;
+      if (needsCheck) {
+        const check = await this.fenixKeepAlive({ grantId: stored.grant_id, session: stored.fenix });
+        if (check?.expired) {
+          throw oauthError('invalid_grant', 'Fenix session expired. Reconnect the MCP account.');
+        }
+        try {
+          return await this.store.rotateRefresh({ refreshToken: body.refresh_token, clientKey: client.client_key, fenix: check?.session });
+        } catch (error) {
+          if (error instanceof OAuthStoreOperationError) throw oauthError('invalid_grant', 'Refresh token is invalid, expired, or already used.');
+          throw error;
+        }
+      }
+    }
     try {
       return await this.store.rotateRefresh({ refreshToken: body.refresh_token, clientKey: client.client_key });
     } catch (error) {

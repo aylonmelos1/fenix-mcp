@@ -73,7 +73,8 @@ export function loadConfig() {
       hcaptchaSiteKey: process.env.FENIX_HCAPTCHA_SITEKEY || 'e94868de-18ba-4314-b0ce-c7c84a1440b6',
       timeoutMs: intEnv('FENIX_TIMEOUT_MS', 30_000, { min: 1000, max: 300_000 }),
       rateLimitPerMinute: intEnv('FENIX_RATE_LIMIT_PER_MINUTE', 60, { min: 1, max: 600 }),
-      maxRetries: intEnv('FENIX_GET_RETRIES', 1, { min: 0, max: 3 })
+      maxRetries: intEnv('FENIX_GET_RETRIES', 1, { min: 0, max: 3 }),
+      keepAliveIntervalMs: intEnv('FENIX_KEEPALIVE_INTERVAL_MS', 20 * 60 * 1000, { min: 60_000, max: 24 * 60 * 60 * 1000 })
     },
     oauth: {
       publicUrl: publicUrl.origin,

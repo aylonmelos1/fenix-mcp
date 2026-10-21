@@ -132,6 +132,38 @@ async function main() {
     });
   };
 
+  const createGrantFenixClient = (grantId, session) => new FenixClient({
+    ...config.fenix,
+    session,
+    grantId,
+    onSessionUpdate: (gid, updatedSession) => oauthStore.updateSession(gid, updatedSession),
+    onSessionExpired: (gid) => oauthStore.revokeGrantById(gid)
+  });
+
+  oauth.fenixKeepAlive = async ({ grantId, session }) => {
+    const client = createGrantFenixClient(grantId, session);
+    return client.keepAlive();
+  };
+
+  let keepAliveRunning = false;
+  const runSessionKeepAlive = async () => {
+    if (keepAliveRunning) return;
+    keepAliveRunning = true;
+    try {
+      const grants = await oauthStore.listActiveGrants();
+      for (const { grantId, fenix } of grants) {
+        const client = createGrantFenixClient(grantId, fenix);
+        await client.keepAlive().catch(() => {});
+      }
+    } catch {
+      console.error('[fenix-mcp] Fenix session keep-alive sweep failed');
+    } finally {
+      keepAliveRunning = false;
+    }
+  };
+  const keepAliveTimer = setInterval(runSessionKeepAlive, config.fenix.keepAliveIntervalMs);
+  keepAliveTimer.unref();
+
   const verifier = {
     async verifyAccessToken(token) {
       const info = await oauth.verifyAccessToken(token);
@@ -156,12 +188,7 @@ async function main() {
   const httpHandler = createMcpHandler(async (context) => {
     const authInfo = context?.authInfo;
     if (!authInfo?.extra?.fenix?.cookieJar || !authInfo?.extra?.grantId) throw new Error('Validated Fenix OAuth session is missing.');
-    const client = new FenixClient({
-      ...config.fenix,
-      session: authInfo.extra.fenix,
-      grantId: authInfo.extra.grantId,
-      onSessionUpdate: (grantId, session) => oauthStore.updateSession(grantId, session)
-    });
+    const client = createGrantFenixClient(authInfo.extra.grantId, authInfo.extra.fenix);
     return buildMcpServer({
       client,
       operations,
@@ -323,6 +350,7 @@ async function main() {
 
   const shutdown = () => server.close(async () => {
     clearInterval(sessionPruneTimer);
+    clearInterval(keepAliveTimer);
     await httpHandler.close().catch(() => {});
     await oauthStore.close().catch(() => {});
     process.exit(0);
