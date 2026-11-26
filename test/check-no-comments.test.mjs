@@ -164,7 +164,7 @@ test("allows a substantive limitation linked to its official documentation sourc
 });
 
 test("marks structurally valid external limitation claims for human verification", () => {
-  const source = "// External limitation: Node.js: behavior: API requires this exact input shape for all callers; impact: Callers must reject values without this undocumented field; https://nodejs.org/api/url.html";
+  const source = "// External limitation: Node.js: behavior: upstream has limitations in this configuration; impact: necessary for compatibility with existing consumers; https://nodejs.org/api/url.html";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1])), []);
   const requirements = findExternalLimitationReviewRequirements("src/example.js", source, new Set([1]));
   assert.equal(requirements.length, 1);
