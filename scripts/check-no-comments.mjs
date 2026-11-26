@@ -414,9 +414,9 @@ function isCopyrightHolder(value) {
   const organizationConnectors = new Set(["and", "of", "the", "for", "by", "in", "at"]);
   const personParticles = new Set(["de", "del", "da", "do", "dos", "di", "du", "van", "von", "der", "la", "le"]);
   const organizationSuffixes = new Set(["foundation", "corporation", "corp", "inc", "ltd", "limited", "llc", "gmbh", "plc", "company", "association", "institute", "university", "consortium", "organization", "organisation", "network", "society", "collective", "contributors", "developers", "authors", "team", "group", "project", "initiative", "committee", "community", "conservancy", "laboratory", "laboratories", "labs", "center", "centre", "trust", "council", "board", "union", "department", "office", "museum", "library", "press", "studio", "agency", "club", "school", "church", "enterprises", "holdings", "partners", "partnership", "industries", "systems", "solutions", "technologies"]);
-  const narrativeWords = new Set(["this", "that", "these", "those", "file", "text", "source", "when", "because", "must", "should", "shall", "will", "would", "could", "can", "is", "are", "was", "were", "be", "been", "being", "generated", "maintained", "maintains", "update", "updates", "updated", "preserve", "preserves", "preserved", "stay", "stays", "keep", "keeps", "kept", "include", "includes", "contains", "provides", "requires", "describes", "describe", "refers", "please", "ensure", "ensures", "note", "comments", "expected", "configuration", "documentation", "guidelines", "consistent", "consistency", "better", "best", "valid", "invalid", "important", "necessary", "always", "never", "follow", "follows", "use", "uses", "used", "create", "creates", "created", "made", "make", "makes", "means", "belongs", "belong", "remains", "remain", "represents", "public", "private", "implementation", "detail", "details", "internal", "before", "handle", "handles", "handled", "handling", "return", "returns", "returned", "returning"]);
+  const narrativeWords = new Set(["this", "that", "these", "those", "file", "text", "source", "when", "because", "must", "should", "shall", "will", "would", "could", "can", "is", "are", "was", "were", "be", "been", "being", "generated", "process", "processes", "processed", "processing", "request", "requests", "requested", "requesting", "maintained", "maintains", "update", "updates", "updated", "preserve", "preserves", "preserved", "stay", "stays", "keep", "keeps", "kept", "include", "includes", "contains", "provides", "requires", "describes", "describe", "refers", "please", "ensure", "ensures", "note", "comments", "expected", "configuration", "documentation", "guidelines", "consistent", "consistency", "better", "best", "valid", "invalid", "important", "necessary", "always", "never", "follow", "follows", "use", "uses", "used", "create", "creates", "created", "made", "make", "makes", "means", "belongs", "belong", "remains", "remain", "represents", "public", "private", "implementation", "detail", "details", "internal", "before", "handle", "handles", "handled", "handling", "return", "returns", "returned", "returning"]);
   const excludedPersonStarts = new Set(["the", "a", "an", "this", "that", "these", "those", "all", "our", "your", "some", "every", "each", "please"]);
-  const narrativeSentence = /\b[\p{Lu}][\p{L}\p{N}’'-]*\s+(?:route|routes|routed|routing|handle|handles|handled|handling|process|processes|processed|processing|send|sends|sent|sending|return|returns|returned|returning)\s+[\p{Lu}][\p{L}\p{N}’'-]*\s+(?:through|before|after|while|when)\b/iu;
+  const narrativeSentence = /\b[\p{Lu}][\p{L}\p{N}’'-]*\s+(?:route|routes|routed|routing|handle|handles|handled|handling|process|processes|processed|processing|send|sends|sent|sending|return|returns|returned|returning)\s+[\p{Lu}][\p{L}\p{N}’'-]*\s+(?:through|before|after|while|when|using|via)\b/iu;
   const isNameToken = token => {
     const normalized = token.replace(/\.$/, "");
     return /^[\p{Lu}\p{Lt}][\p{L}\p{N}'’.-]*$/u.test(token) ||
@@ -485,12 +485,13 @@ function isPublicApiDoc(comment, source, filePath) {
   const firstTag = contractLines.findIndex(line => contractTag.test(line));
   const descriptionLines = firstTag < 0 ? [] : contractLines.slice(0, firstTag);
   const taggedLines = firstTag < 0 ? [] : contractLines.slice(firstTag);
-  const narrativeDescription = /\b(?:implementation|internal|private|detail|details|note|remember|important|temporary|currently|workaround|debug|instead|because|must|should|always|never)\b/i;
+  const narrativeDescription = /\b(?:implementation|internal|private|detail|details|note|remember|important|temporary|currently|workaround|debug|instead|because|must|should|always|never|helper|log|logs|logging|before|after|returning)\b/i;
   const descriptionLength = descriptionLines.reduce((length, line) => length + line.length, 0);
   const conciseContract = firstTag >= 0 && contractLines.length <= 12 &&
     descriptionLines.length <= 2 && descriptionLength <= 240 &&
     descriptionLines.every(line => line.length <= 160 && !narrativeDescription.test(line)) &&
-    taggedLines.every(line => contractTag.test(line));
+    taggedLines.every(line => contractTag.test(line) &&
+      !narrativeDescription.test(line) && !/[.!?]\s+[A-Z]/.test(line));
   return Boolean(exportedDeclaration && conciseContract);
 }
 

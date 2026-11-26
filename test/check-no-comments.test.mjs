@@ -69,6 +69,21 @@ test("rejects the reported routing sentence as an SPDX holder", () => {
   assert.equal(findAddedCommentFindings("src/example.js", organizationLookalike, new Set([1])).length, 1);
 });
 
+test("rejects title-case process wording as an SPDX holder", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Applications Process Requests\n */\nexport const value = 1;";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects route wording with using or via before an organization suffix", () => {
+  const sources = [
+    "/*\n * SPDX-FileCopyrightText: 2026 Applications Route Requests Using Stable Callback Technologies\n */\nexport const value = 1;",
+    "/*\n * Copyright 2026 Applications Route Requests Via Stable Callback Technologies\n */\nexport const value = 1;"
+  ];
+  for (const source of sources) {
+    assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+  }
+});
+
 test("allows an organization name containing a narrative verb", () => {
   const source = "/*\n * SPDX-FileCopyrightText: 2026 Acme Route Systems, Inc.\n */\nexport const value = 1;";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
@@ -97,6 +112,11 @@ test("rejects narrative prose mixed into an SPDX header", () => {
 test("allows a concise JSDoc description with exported contract tags", () => {
   const source = "/**\n * Returns a safe callback URL for the matching authorization flow.\n * @param {string} callbackUrl The callback URL to validate.\n * @returns {URL} The validated callback URL.\n */\nexport function publicApi(callbackUrl) { return new URL(callbackUrl); }";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4, 5])), []);
+});
+
+test("rejects narrative appended to a JSDoc contract tag", () => {
+  const source = "/**\n * @param {string} value Input value. This helper logs it before returning.\n */\nexport function publicApi(value) { return value; }";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
 test("rejects narrative prose mixed into an exported JSDoc contract", () => {
