@@ -69,6 +69,11 @@ test("rejects the reported routing sentence as an SPDX holder", () => {
   assert.equal(findAddedCommentFindings("src/example.js", organizationLookalike, new Set([1])).length, 1);
 });
 
+test("rejects retrieved-data narrative as an SPDX holder", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Applications Retrieve Data Using Stable Callback Technologies\n */\nexport const value = 1;";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
 test("rejects title-case process wording as an SPDX holder", () => {
   const source = "/*\n * SPDX-FileCopyrightText: 2026 Applications Process Requests\n */\nexport const value = 1;";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
