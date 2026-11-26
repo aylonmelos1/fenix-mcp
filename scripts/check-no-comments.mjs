@@ -479,19 +479,37 @@ function isPublicApiDoc(comment, source, filePath) {
   const exportedDeclaration = followingCode && /^export\s+(?:(?:default|declare|abstract|async)\s+)*(?:function|class|const|let|var|interface|type|enum)\b|^export\s*\{/.test(followingCode.trim());
   const body = comment.text.slice(3, -2);
   const contractLines = body.split(/\r?\n/)
-    .map(line => line.replace(/^\s*\*\s?/, "").trim())
-    .filter(Boolean);
+    .map(line => {
+      const content = line.replace(/^\s*\*\s?/, "");
+      return { text: content.trim(), indent: content.length - content.trimStart().length };
+    })
+    .filter(line => line.text);
   const contractTag = /^@(param|returns?|throws|deprecated)\s+\S/;
-  const firstTag = contractLines.findIndex(line => contractTag.test(line));
+  const firstTag = contractLines.findIndex(line => contractTag.test(line.text));
   const descriptionLines = firstTag < 0 ? [] : contractLines.slice(0, firstTag);
   const taggedLines = firstTag < 0 ? [] : contractLines.slice(firstTag);
   const narrativeDescription = /\b(?:implementation|internal|private|detail|details|note|remember|important|temporary|currently|workaround|debug|instead|because|must|should|always|never|helper|log|logs|logging|before|after|returning)\b/i;
-  const descriptionLength = descriptionLines.reduce((length, line) => length + line.length, 0);
+  const descriptionLength = descriptionLines.reduce((length, line) => length + line.text.length, 0);
+  let currentTag = null;
+  let continuationLines = 0;
+  const taggedLinesValid = taggedLines.every(({ text, indent }) => {
+    const tag = contractTag.exec(text);
+    if (tag) {
+      currentTag = tag[1];
+      continuationLines = 0;
+      return !narrativeDescription.test(text) && !/[.!?]\s+[A-Z]/.test(text);
+    }
+    if (currentTag !== "param" || indent < 1 || continuationLines >= 2 ||
+        text.length > 160 || narrativeDescription.test(text) || /[.!?]\s+[A-Z]/.test(text)) {
+      return false;
+    }
+    continuationLines += 1;
+    return true;
+  });
   const conciseContract = firstTag >= 0 && contractLines.length <= 12 &&
     descriptionLines.length <= 2 && descriptionLength <= 240 &&
-    descriptionLines.every(line => line.length <= 160 && !narrativeDescription.test(line)) &&
-    taggedLines.every(line => contractTag.test(line) &&
-      !narrativeDescription.test(line) && !/[.!?]\s+[A-Z]/.test(line));
+    descriptionLines.every(({ text }) => text.length <= 160 && !narrativeDescription.test(text)) &&
+    taggedLinesValid;
   return Boolean(exportedDeclaration && conciseContract);
 }
 
@@ -602,6 +620,25 @@ function isExternalLimitationReference(comment) {
     : false;
 
   return (documentationLabelMatches && documentationPathMatches) || issueLabelMatches || rfcReference;
+}
+
+export function findExternalLimitationReviewRequirements(filePath, source, addedLines) {
+  const spec = commentSpec(filePath);
+  if (!spec) {
+    return [];
+  }
+
+  return collectComments(source, spec).flatMap(comment => {
+    const changedLine = [...addedLines].find(number => number >= comment.startLine && number <= comment.endLine);
+    return changedLine === undefined || !isExternalLimitationReference(comment)
+      ? []
+      : [{
+          file: filePath,
+          line: changedLine,
+          text: cleanCommentText(comment),
+          reason: "Verify that the cited source supports the stated behavior and impact."
+        }];
+  });
 }
 
 function isAllowedComment(comment, source, filePath) {
@@ -734,11 +771,21 @@ function main() {
   addedLinesForUntrackedFiles(added);
 
   const findings = [];
+  const externalReviewRequirements = [];
   for (const [filePath, lines] of added) {
     if (!commentSpec(filePath)) {
       continue;
     }
-    findings.push(...findAddedCommentFindings(filePath, safeRead(filePath), lines));
+    const source = safeRead(filePath);
+    findings.push(...findAddedCommentFindings(filePath, source, lines));
+    externalReviewRequirements.push(...findExternalLimitationReviewRequirements(filePath, source, lines));
+  }
+
+  if (externalReviewRequirements.length > 0) {
+    console.warn("Human review required: an allowlisted source URL does not verify the stated limitation.");
+    for (const requirement of externalReviewRequirements) {
+      console.warn(requirement.file + ":" + requirement.line + ": verify the behavior and impact against the cited source.");
+    }
   }
 
   if (findings.length > 0) {

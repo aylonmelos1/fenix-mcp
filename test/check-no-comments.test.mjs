@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { collectComments, findAddedCommentFindings, parseAddedLineMap, selectDefaultBase } from "../scripts/check-no-comments.mjs";
+import { collectComments, findAddedCommentFindings, findExternalLimitationReviewRequirements, parseAddedLineMap, selectDefaultBase } from "../scripts/check-no-comments.mjs";
 
 test("diff parsing records only added line numbers", () => {
   const diff = [
@@ -114,8 +114,23 @@ test("allows a concise JSDoc description with exported contract tags", () => {
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4, 5])), []);
 });
 
+test("allows a concise multiline JSDoc param description", () => {
+  const source = "/**\n * @param {string} value\n *   The input value to normalize for the callback.\n */\nexport function publicApi(value) { return value; }";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4])), []);
+});
+
+test("allows the reported multiline JSDoc parameter continuation", () => {
+  const source = "/**\n * @param options configuration object\n *   with a supported mode\n * @returns normalized value\n */\nexport function normalize(options) { return options.mode; }";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4, 5])), []);
+});
+
 test("rejects narrative appended to a JSDoc contract tag", () => {
   const source = "/**\n * @param {string} value Input value. This helper logs it before returning.\n */\nexport function publicApi(value) { return value; }";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects narrative in an indented multiline JSDoc param description", () => {
+  const source = "/**\n * @param {string} value\n *   This helper logs the value before returning.\n */\nexport function publicApi(value) { return value; }";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
@@ -146,6 +161,15 @@ test("rejects broad lint suppressions", () => {
 test("allows a substantive limitation linked to its official documentation source", () => {
   const source = "// External limitation: Node.js: behavior: The URL parser normalizes encoded host separators; impact: clients must follow the documented origin parsing order; https://nodejs.org/api/url.html";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1])), []);
+});
+
+test("marks structurally valid external limitation claims for human verification", () => {
+  const source = "// External limitation: Node.js: behavior: API requires this exact input shape for all callers; impact: Callers must reject values without this undocumented field; https://nodejs.org/api/url.html";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1])), []);
+  const requirements = findExternalLimitationReviewRequirements("src/example.js", source, new Set([1]));
+  assert.equal(requirements.length, 1);
+  assert.equal(requirements[0].line, 1);
+  assert.match(requirements[0].reason, /supports the stated behavior and impact/);
 });
 
 test("rejects placeholder or generic hosts for external limitation exceptions", () => {
