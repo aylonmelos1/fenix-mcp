@@ -401,6 +401,28 @@ function commentContentLines(comment) {
     .filter(Boolean);
 }
 
+function isCopyrightHolder(value) {
+  const holder = value.trim();
+  if (holder.length === 0 || holder.length > 120) {
+    return false;
+  }
+
+  const tokens = holder.match(/[\p{L}\p{N}]+(?:[’'][\p{L}\p{N}]+)*\.?/gu) || [];
+  const connectors = new Set(["and", "of", "the", "for", "by"]);
+  const narrativeWords = new Set(["this", "that", "these", "those", "file", "text", "source", "when", "because", "must", "should", "shall", "will", "would", "could", "can", "is", "are", "was", "were", "be", "been", "being", "generated", "maintained", "update", "updated", "preserve", "preserved", "stay", "stays", "keep", "kept", "include", "includes", "contains", "provides", "requires", "describes", "refers", "please", "ensure", "note"]);
+  const isNameToken = token => {
+    const normalized = token.replace(/\.$/, "");
+    return connectors.has(normalized.toLowerCase()) ||
+      /^[\p{Lu}\p{Lt}][\p{L}\p{N}'’.-]*$/u.test(token) ||
+      /^[A-Z0-9]{2,}$/u.test(normalized) ||
+      /^[a-z][\p{L}\p{N}'’.-]*[A-Z][\p{L}\p{N}'’.-]*$/u.test(normalized);
+  };
+  return tokens.length > 0 && tokens.length <= 12 &&
+    /^[\p{L}\p{N}.,&'’() -]+$/u.test(holder) &&
+    !tokens.some(token => narrativeWords.has(token.replace(/\.$/, "").toLowerCase())) &&
+    tokens.every(isNameToken);
+}
+
 function isHeaderLicense(comment, source) {
   const prefix = source.slice(0, comment.startOffset).replace(/^#![^\n]*(?:\n|$)/, "");
   if (prefix.trim() !== "") {
@@ -413,9 +435,16 @@ function isHeaderLicense(comment, source) {
   }
 
   const spdxIdentifier = /^SPDX-License-Identifier:\s+[A-Za-z0-9][A-Za-z0-9.+()-]*(?:\s+(?:AND|OR|WITH)\s+[A-Za-z0-9][A-Za-z0-9.+()-]*)*$/i;
-  const spdxCopyright = /^SPDX-FileCopyrightText:\s+\d{4}(?:-\d{4})?\s+[\p{L}\p{N}][\p{L}\p{N} .,&'’()-]{0,119}$/u;
-  const copyright = /^Copyright\s+(?:\(c\)|©)?\s*\d{4}(?:-\d{4})?\s+[\p{L}\p{N}][\p{L}\p{N} .,&'’()-]{0,119}$/u;
-  const validLine = line => spdxIdentifier.test(line) || spdxCopyright.test(line) || copyright.test(line);
+  const spdxCopyright = /^SPDX-FileCopyrightText:\s+\d{4}(?:-\d{4})?\s+(.+)$/u;
+  const copyright = /^Copyright\s+(?:\(c\)|©)?\s*\d{4}(?:-\d{4})?\s+(.+)$/u;
+  const validLine = line => {
+    if (spdxIdentifier.test(line)) {
+      return true;
+    }
+    const spdxHolder = spdxCopyright.exec(line);
+    const copyrightHolder = copyright.exec(line);
+    return isCopyrightHolder(spdxHolder?.[1] || copyrightHolder?.[1] || "");
+  };
   return lines.some(validLine) && lines.every(validLine);
 }
 
