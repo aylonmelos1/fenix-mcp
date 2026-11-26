@@ -42,9 +42,24 @@ test("allows an SPDX license block at the file header", () => {
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
 });
 
+test("allows a valid copyright header", () => {
+  const source = "/*\n * Copyright (c) 2026 Aylon Melo\n */\nexport const value = 1;";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
+});
+
 test("allows JSDoc contracts on exported declarations", () => {
   const source = "/**\n * @param {string} value\n * @returns {string}\n */\nexport function publicApi(value) { return value; }";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4])), []);
+});
+
+test("rejects narrative prose mixed into an SPDX header", () => {
+  const source = "/*\n * SPDX-License-Identifier: MIT\n * This component relies on this license for unrelated implementation notes.\n */\nexport const value = 1;";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects narrative prose mixed into an exported JSDoc contract", () => {
+  const source = "/**\n * @param {string} value The value to normalize.\n * @returns {string} The normalized value.\n * This implementation detail is not part of the public contract.\n */\nexport function publicApi(value) { return value; }";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
 test("rejects JSDoc without an exported contract", () => {
@@ -169,6 +184,21 @@ test("ignores slash pairs in regex literals and finds a real trailing comment", 
   const findings = findAddedCommentFindings("src/example.js", source, new Set([1]));
   assert.equal(findings.length, 1);
   assert.equal(findings[0].text, "narration");
+});
+
+test("recognizes division after postfix increment and decrement", () => {
+  const sources = [
+    "let count = 0;\nconst quotient = count++ / divisor; // narration",
+    "let count = 0;\nconst quotient = count-- / divisor; // narration"
+  ];
+  for (const source of sources) {
+    assert.equal(findAddedCommentFindings("src/example.js", source, new Set([2])).length, 1);
+  }
+});
+
+test("scans Terraform variable files for comments", () => {
+  const source = "value = \"example\"\n# narration";
+  assert.equal(findAddedCommentFindings("terraform/example.auto.tfvars", source, new Set([2])).length, 1);
 });
 
 test("fails closed on unterminated JavaScript strings", () => {

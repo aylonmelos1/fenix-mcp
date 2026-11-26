@@ -28,6 +28,7 @@ const commentSpecs = new Map([
   [".conf", { line: ["#", ";"], block: [], quotes: ["'", "\""] }],
   [".env", { line: ["#"], block: [], quotes: ["'", "\""] }],
   [".tf", { line: ["#", "//"], block: [["/*", "*/"]], quotes: ["'", "\""] }],
+  [".tfvars", { line: ["#", "//"], block: [["/*", "*/"]], quotes: ["'", "\""] }],
   [".hcl", { line: ["#", "//"], block: [["/*", "*/"]], quotes: ["'", "\""] }],
   [".properties", { line: ["#", "!"], block: [], quotes: ["'", "\""] }],
   [".mk", { line: ["#"], block: [], quotes: ["'", "\""].concat([String.fromCharCode(96)]) }]
@@ -299,7 +300,14 @@ export function collectComments(source, spec) {
         index += 1;
         continue;
       }
-      if (character === "[" || character === "{" || character === "," || character === ":" || character === ";" || character === "=" || character === "!" || character === "?" || character === "+" || character === "-" || character === "*" || character === "%" || character === "&" || character === "|" || character === "^" || character === "~" || character === "<" || character === ">") {
+      if (character === "+" || character === "-") {
+        const doubled = source[index + 1] === character;
+        const postfix = doubled && !canStartRegex;
+        canStartRegex = !postfix;
+        index += doubled ? 2 : 1;
+        continue;
+      }
+      if (character === "[" || character === "{" || character === "," || character === ":" || character === ";" || character === "=" || character === "!" || character === "?" || character === "*" || character === "%" || character === "&" || character === "|" || character === "^" || character === "~" || character === "<" || character === ">") {
         canStartRegex = true;
         index += 1;
         continue;
@@ -382,21 +390,52 @@ function cleanCommentText(comment) {
     .trim();
 }
 
+function commentContentLines(comment) {
+  return comment.text
+    .replace(/^\/\*+/, "")
+    .replace(/\*\/$/, "")
+    .replace(/^<!--/, "")
+    .replace(/-->$/, "")
+    .split(/\r?\n/)
+    .map(line => line.replace(/^\s*\*\s?/, "").replace(/^(?:\/\/|#|--|;|!)\s?/, "").trim())
+    .filter(Boolean);
+}
+
 function isHeaderLicense(comment, source) {
   const prefix = source.slice(0, comment.startOffset).replace(/^#![^\n]*(?:\n|$)/, "");
-  return prefix.trim() === "" && /SPDX-License-Identifier:|Copyright|Licensed under|MIT License|Apache License|GNU General Public License/i.test(comment.text);
+  if (prefix.trim() !== "") {
+    return false;
+  }
+
+  const lines = commentContentLines(comment);
+  if (lines.length === 0 || lines.length > 8) {
+    return false;
+  }
+
+  const spdxIdentifier = /^SPDX-License-Identifier:\s+[A-Za-z0-9][A-Za-z0-9.+()-]*(?:\s+(?:AND|OR|WITH)\s+[A-Za-z0-9][A-Za-z0-9.+()-]*)*$/i;
+  const spdxCopyright = /^SPDX-FileCopyrightText:\s+\d{4}(?:-\d{4})?\s+[\p{L}\p{N}][\p{L}\p{N} .,&'’()-]{0,119}$/u;
+  const copyright = /^Copyright\s+(?:\(c\)|©)?\s*\d{4}(?:-\d{4})?\s+[\p{L}\p{N}][\p{L}\p{N} .,&'’()-]{0,119}$/u;
+  const validLine = line => spdxIdentifier.test(line) || spdxCopyright.test(line) || copyright.test(line);
+  return lines.some(validLine) && lines.every(validLine);
 }
 
 function isPublicApiDoc(comment, source, filePath) {
-  if (!javascriptExtensions.has(path.extname(filePath).toLowerCase()) || !comment.text.startsWith("/**")) {
+  if (!javascriptExtensions.has(path.extname(filePath).toLowerCase()) || !comment.text.startsWith("/**") ||
+      comment.text.length > 600) {
     return false;
   }
 
   const sourceLines = source.split(/\r?\n/);
   const followingCode = sourceLines.slice(comment.endLine).find(line => line.trim() !== "");
   const exportedDeclaration = followingCode && /^export\s+(?:(?:default|declare|abstract|async)\s+)*(?:function|class|const|let|var|interface|type|enum)\b|^export\s*\{/.test(followingCode.trim());
-  const contractTag = /@\s*(?:param|returns?|throws|deprecated)\b/.test(comment.text);
-  return Boolean(exportedDeclaration && contractTag);
+  const body = comment.text.slice(3, -2);
+  const contractLines = body.split(/\r?\n/)
+    .map(line => line.replace(/^\s*\*\s?/, "").trim())
+    .filter(Boolean);
+  const contractTag = /^@(param|returns?|throws|deprecated)\s+\S/;
+  const conciseContract = contractLines.length > 0 && contractLines.length <= 12 &&
+    contractLines.every(line => contractTag.test(line));
+  return Boolean(exportedDeclaration && conciseContract);
 }
 
 function isFormattingDirective(comment) {
