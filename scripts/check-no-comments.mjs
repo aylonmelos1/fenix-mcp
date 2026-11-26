@@ -441,10 +441,15 @@ function isExternalLimitationReference(comment) {
     return false;
   }
 
-  const documentationHost = host.startsWith("docs.") ||
-    host.startsWith("developer.") ||
-    host.endsWith(".readthedocs.io") ||
-    host === "nodejs.org";
+  const documentationHost = [
+    "developer.mozilla.org",
+    "docs.github.com",
+    "docs.npmjs.com",
+    "nodejs.org"
+  ].includes(host) || host.endsWith(".readthedocs.io");
+  const documentationPath = host === "nodejs.org"
+    ? /^\/api(?:\/|$)/.test(url.pathname)
+    : url.pathname !== "/";
   const githubIssue = host === "github.com" &&
     /^\/[^/]+\/[^/]+\/(?:issues|pull)\/\d+\/?$/.test(url.pathname);
   const gitlabIssue = host === "gitlab.com" &&
@@ -454,7 +459,7 @@ function isExternalLimitationReference(comment) {
     (host === "datatracker.ietf.org" &&
     /^\/doc\/html\/rfc\d+\/?$/i.test(url.pathname));
 
-  return documentationHost || githubIssue || gitlabIssue || rfcReference;
+  return (documentationHost && documentationPath) || githubIssue || gitlabIssue || rfcReference;
 }
 
 function isAllowedComment(comment, source, filePath) {

@@ -193,3 +193,13 @@ test("rejects external limitation URLs with user information", () => {
   const source = "// External limitation: upstream requires this shape; https://reader@docs.github.com/en/rest";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
+
+test("rejects unrecognized documentation-looking hosts", () => {
+  const source = "// External limitation: upstream requires this shape; https://docs.vendor.tld/api/reference";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("allows a specific external issue reference", () => {
+  const source = "// External limitation: upstream requires this shape; https://github.com/org/project/issues/123";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1])), []);
+});
