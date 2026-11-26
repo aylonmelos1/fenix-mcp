@@ -66,14 +66,14 @@ test("rejects broad lint suppressions", () => {
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
-test("allows a short linked external limitation reference on a recognized documentation host", () => {
-  const source = "// External limitation: upstream requires this shape; https://docs.github.com/en/rest";
+test("allows a substantive limitation linked to its official documentation source", () => {
+  const source = "// External limitation: Node.js: behavior: The URL parser normalizes encoded host separators; impact: clients must follow the documented origin parsing order; https://nodejs.org/api/url.html";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1])), []);
 });
 
 test("rejects placeholder or generic hosts for external limitation exceptions", () => {
-  const placeholder = "// External limitation: upstream requires this shape; https://example.org/docs";
-  const generic = "// External limitation: upstream requires this shape; https://vendor.invalid/docs";
+  const placeholder = "// External limitation: GitHub REST API: behavior: The endpoint validates requests before routing; impact: clients must preserve that documented order; https://example.org/docs";
+  const generic = "// External limitation: npm: behavior: The CLI resolves package versions before installation; impact: scripts must respect the documented command behavior; https://vendor.invalid/docs";
   assert.equal(findAddedCommentFindings("src/example.js", placeholder, new Set([1])).length, 1);
   assert.equal(findAddedCommentFindings("src/example.js", generic, new Set([1])).length, 1);
 });
@@ -124,7 +124,7 @@ test("rejects an SPDX marker outside the file header", () => {
 });
 
 test("rejects linked comments that lack the external limitation label", () => {
-  const source = "// See https://example.org/docs";
+  const source = "// See Node.js documentation for this constraint; https://nodejs.org/api/url.html";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
@@ -190,16 +190,61 @@ test("fails closed on unterminated JavaScript template expressions", () => {
 });
 
 test("rejects external limitation URLs with user information", () => {
-  const source = "// External limitation: upstream requires this shape; https://reader@docs.github.com/en/rest";
+  const source = "// External limitation: GitHub REST API: behavior: The endpoint validates requests before routing; impact: clients must preserve that documented order; https://reader@docs.github.com/en/rest";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
 test("rejects unrecognized documentation-looking hosts", () => {
-  const source = "// External limitation: upstream requires this shape; https://docs.vendor.tld/api/reference";
+  const source = "// External limitation: GitHub REST API: behavior: The endpoint validates requests before routing; impact: clients must preserve that documented order; https://docs.vendor.tld/api/reference";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
-test("allows a specific external issue reference", () => {
-  const source = "// External limitation: upstream requires this shape; https://github.com/org/project/issues/123";
+test("allows an issue reference in an upstream dependency repository", () => {
+  const source = "// External limitation: MCP SDK: behavior: Validates wire messages before route checks; impact: Handler preserves upstream checks here; https://github.com/modelcontextprotocol/typescript-sdk/issues/1";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1])), []);
+});
+
+
+test("rejects non-substantive external limitation descriptions", () => {
+  const source = "// External limitation: Node.js: behavior: upstream requires this shape; impact: necessary for code review; https://nodejs.org/api/url.html";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects internal and unapproved issue references", () => {
+  const sources = [
+    "// External limitation: Fenix MCP: behavior: Scanner references a local issue; impact: reviewers must verify ownership before approval; https://github.com/aylonmelos1/fenix-mcp/issues/123",
+    "// External limitation: tooling: behavior: Scanner links to this issue directly; impact: reviewers must verify external ownership; https://github.com/acme/private-tool/issues/123",
+    "// External limitation: tooling: behavior: Scanner links to this issue directly; impact: reviewers must verify external ownership; https://gitlab.com/acme/private-tool/-/issues/123"
+  ];
+  for (const source of sources) {
+    assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+  }
+});
+
+test("rejects prohibited markers inside otherwise allowed comments", () => {
+  const markers = ["TODO", "FIXME", "HACK", "IMPORTANT", "temporário", "não remova"];
+  for (const marker of markers) {
+    const external = "// External limitation: Node.js: behavior: Parser normalizes encoded host separators; impact: clients follow origin parsing order " + marker + "; https://nodejs.org/api/url.html";
+    assert.equal(findAddedCommentFindings("src/example.js", external, new Set([1])).length, 1);
+  }
+  const license = "/* SPDX-License-Identifier: MIT\n * FIXME remove this later\n */\nexport const value = 1;";
+  const jsdoc = "/**\n * @param {string} value\n * @returns {string}\n * HACK ignore validation\n */\nexport function publicApi(value) { return value; }";
+  assert.equal(findAddedCommentFindings("src/example.js", license, new Set([1])).length, 1);
+  assert.equal(findAddedCommentFindings("src/example.js", jsdoc, new Set([1])).length, 1);
+});
+
+test("rejects lookalike and user-controlled documentation hosts", () => {
+  const sources = [
+    "// External limitation: GitHub REST API: behavior: The endpoint validates requests before routing; impact: clients must preserve that documented order; https://docs.github.com.attacker.example/en/rest",
+    "// External limitation: MDN: behavior: The browser normalizes request URLs before origin comparison; impact: callers must preserve the documented parsing order; https://developer.attacker.example/api",
+    "// External limitation: Node.js: behavior: The URL parser normalizes encoded host separators; impact: clients must follow the documented origin parsing order; https://attacker.readthedocs.io/api"
+  ];
+  for (const source of sources) {
+    assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+  }
+});
+
+test("requires the external source label to match the documentation host", () => {
+  const source = "// External limitation: Vendor API: behavior: The URL parser normalizes encoded host separators; impact: clients must follow the documented origin parsing order; https://nodejs.org/api/url.html";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });

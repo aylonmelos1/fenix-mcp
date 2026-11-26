@@ -149,7 +149,7 @@ npm test
 npm run check:no-comments -- --base origin/main
 ```
 
-A revisão humana ainda deve avaliar o sentido de cada exceção aprovada pelo scanner.
+As exceções externas usam o formato `External limitation: <fonte>: behavior: <comportamento concreto>; impact: <consequência concreta>; <URL>`, com ao menos cinco palavras em cada descrição. O scanner aceita apenas documentação oficial de MDN, GitHub, npm e Node.js, RFCs do IETF e issues/PRs dos repositórios upstream das dependências diretas `@modelcontextprotocol/*`, `dotenv`, `pg`, `tough-cookie` e `zod`; o próprio repositório e repositórios arbitrários não são fontes externas válidas. Marcadores proibidos são rejeitados mesmo dentro de outra exceção. A revisão humana confirma que a fonte sustenta a limitação.
 
 ```sh
 npm run docs:endpoints

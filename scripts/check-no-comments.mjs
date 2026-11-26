@@ -414,18 +414,64 @@ function isFormattingDirective(comment) {
   return rules.length > 0 && rules.every(rule => ["prettier/prettier", "max-len"].includes(rule));
 }
 
+const externalIssueSourceLabels = new Map([
+  ["modelcontextprotocol/typescript-sdk", new Set(["mcpsdk"])],
+  ["motdotla/dotenv", new Set(["dotenv"])],
+  ["brianc/node-postgres", new Set(["pg", "nodepostgres"])],
+  ["salesforce/tough-cookie", new Set(["toughcookie"])],
+  ["colinhacks/zod", new Set(["zod"])]
+]);
+
+const externalDocumentationSourceLabels = new Map([
+  ["developer.mozilla.org", new Set(["javascript", "mdn", "webapi"])],
+  ["docs.github.com", new Set(["github", "githubactions", "githubrestapi"])],
+  ["docs.npmjs.com", new Set(["npm", "npmcli"])],
+  ["nodejs.org", new Set(["nodejs"])]
+]);
+
+function normalizeSourceLabel(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function containsProhibitedMarker(comment) {
+  const text = cleanCommentText(comment);
+  return /\b(?:TODO|FIXME|HACK|IMPORTANT)\b|temporarily|temporary|temporário|temporária|temporariamente|do not remove|don't remove|não remova|não mexa aqui/i.test(text);
+}
+
 function isExternalLimitationReference(comment) {
   const text = cleanCommentText(comment).replace(/\s+/g, " ");
-  if (text.length > 200 || !/^external limitation:\s/i.test(text)) {
+  if (text.length > 200) {
     return false;
   }
 
   const references = [...text.matchAll(/https?:\/\/[^\s<>()]+/gi)];
-  if (references.length !== 1 || !/^https:\/\//i.test(references[0][0])) {
+  if (references.length !== 1) {
     return false;
   }
 
-  const reference = references[0][0].replace(/[.,;!?]+$/, "");
+  const referenceMatch = references[0];
+  const reference = referenceMatch[0].replace(/[.,;!?]+$/, "");
+  const beforeReference = text.slice(0, referenceMatch.index).trim();
+  const afterReference = text.slice(referenceMatch.index + referenceMatch[0].length).trim();
+  if (!beforeReference.endsWith(";") || (afterReference && !/^[.,;!?]+$/.test(afterReference))) {
+    return false;
+  }
+
+  const limitation = /^external limitation:\s*([^:;]{2,40}):\s*behavior:\s*([^;]+);\s*impact:\s*(.+)$/i.exec(beforeReference.slice(0, -1).trim());
+  if (!limitation) {
+    return false;
+  }
+
+  const behavior = limitation[2].trim();
+  const impact = limitation[3].trim();
+  const behaviorWords = behavior.match(/[\p{L}\p{N}]+/gu) || [];
+  const impactWords = impact.match(/[\p{L}\p{N}]+/gu) || [];
+  if (behavior.length < 20 || behaviorWords.length < 5 ||
+      impact.length < 20 || impactWords.length < 5) {
+    return false;
+  }
+
+  const sourceLabel = normalizeSourceLabel(limitation[1]);
   let url;
   try {
     url = new URL(reference);
@@ -441,34 +487,36 @@ function isExternalLimitationReference(comment) {
     return false;
   }
 
-  const documentationHost = [
-    "developer.mozilla.org",
-    "docs.github.com",
-    "docs.npmjs.com",
-    "nodejs.org"
-  ].includes(host) || host.endsWith(".readthedocs.io");
-  const documentationPath = host === "nodejs.org"
-    ? /^\/api(?:\/|$)/.test(url.pathname)
-    : url.pathname !== "/";
+  const documentationSources = externalDocumentationSourceLabels.get(host);
+  const documentationLabelMatches = documentationSources?.has(sourceLabel) === true;
+  const documentationPathMatches =
+    (host === "developer.mozilla.org" && /^\/(?:en-US|en)\/docs\/.+/.test(url.pathname)) ||
+    (host === "docs.github.com" && /^\/en\/(?:rest|actions|packages|repositories)(?:\/|$)/.test(url.pathname)) ||
+    (host === "docs.npmjs.com" && /^\/(?:cli|commands|using-npm|about-npm)(?:\/|$)/.test(url.pathname)) ||
+    (host === "nodejs.org" && /^\/api\/.+/.test(url.pathname));
   const githubIssue = host === "github.com" &&
-    /^\/[^/]+\/[^/]+\/(?:issues|pull)\/\d+\/?$/.test(url.pathname);
-  const gitlabIssue = host === "gitlab.com" &&
-    /^\/[^/]+\/[^/]+\/-\/(?:issues|merge_requests)\/\d+\/?$/.test(url.pathname);
-  const rfcReference = (host === "www.rfc-editor.org" &&
-    /^\/rfc\/rfc\d+\/?$/i.test(url.pathname)) ||
-    (host === "datatracker.ietf.org" &&
-    /^\/doc\/html\/rfc\d+\/?$/i.test(url.pathname));
+    /^\/([^/]+)\/([^/]+)\/(?:issues|pull)\/\d+\/?$/.exec(url.pathname);
+  const issueRepository = githubIssue ? (githubIssue[1] + "/" + githubIssue[2]).toLowerCase() : null;
+  const issueSources = issueRepository ? externalIssueSourceLabels.get(issueRepository) : null;
+  const issueLabelMatches = issueSources?.has(sourceLabel) === true;
+  const rfcSource = /^rfc\d+$/i.test(sourceLabel) || sourceLabel === "ietf";
+  const rfcReference = rfcSource
+    ? (host === "www.rfc-editor.org" && /^\/rfc\/rfc\d+\/?$/i.test(url.pathname)) ||
+      (host === "datatracker.ietf.org" && /^\/doc\/html\/rfc\d+\/?$/i.test(url.pathname))
+    : false;
 
-  return (documentationHost && documentationPath) || githubIssue || gitlabIssue || rfcReference;
+  return (documentationLabelMatches && documentationPathMatches) || issueLabelMatches || rfcReference;
 }
 
 function isAllowedComment(comment, source, filePath) {
+  if (containsProhibitedMarker(comment)) {
+    return false;
+  }
   return isHeaderLicense(comment, source) ||
     isPublicApiDoc(comment, source, filePath) ||
     isFormattingDirective(comment) ||
     isExternalLimitationReference(comment);
 }
-
 export function findAddedCommentFindings(filePath, source, addedLines) {
   const spec = commentSpec(filePath);
   if (!spec) {
