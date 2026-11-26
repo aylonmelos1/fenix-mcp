@@ -62,6 +62,23 @@ test("rejects the reported title-case sentence as an SPDX holder", () => {
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
+test("rejects the reported routing sentence as an SPDX holder", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Applications Route Requests Through Stable Callback\n */\nexport const value = 1;";
+  const organizationLookalike = "/*\n * SPDX-FileCopyrightText: 2026 Applications Route Requests Through Stable Callback Technologies\n */\nexport const value = 1;";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+  assert.equal(findAddedCommentFindings("src/example.js", organizationLookalike, new Set([1])).length, 1);
+});
+
+test("allows an organization name containing a narrative verb", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Acme Route Systems, Inc.\n */\nexport const value = 1;";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
+});
+
+test("allows a personal name as an SPDX copyright holder", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Jane Doe\n */\nexport const value = 1;";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
+});
+
 test("allows a named SPDX copyright holder", () => {
   const source = "/*\n * SPDX-FileCopyrightText: 2026 The Apache Software Foundation\n */\nexport const value = 1;";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
