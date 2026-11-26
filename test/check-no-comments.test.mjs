@@ -74,6 +74,11 @@ test("rejects retrieved-data narrative as an SPDX holder", () => {
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
+test("rejects ambiguous title-case wording as an SPDX holder", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Cache Expiration Strategy\n */\nexport const value = 1;";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
 test("rejects title-case process wording as an SPDX holder", () => {
   const source = "/*\n * SPDX-FileCopyrightText: 2026 Applications Process Requests\n */\nexport const value = 1;";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
@@ -91,6 +96,11 @@ test("rejects route wording with using or via before an organization suffix", ()
 
 test("allows an organization name containing a narrative verb", () => {
   const source = "/*\n * SPDX-FileCopyrightText: 2026 Acme Route Systems, Inc.\n */\nexport const value = 1;";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
+});
+
+test("allows an extended personal name with a middle initial", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Jane Q. Doe\n */\nexport const value = 1;";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
 });
 
@@ -141,6 +151,16 @@ test("rejects narrative in an indented multiline JSDoc param description", () =>
 
 test("rejects narrative prose mixed into an exported JSDoc contract", () => {
   const source = "/**\n * @param {string} value The value to normalize.\n * @returns {string} The normalized value.\n * This implementation detail is not part of the public contract.\n */\nexport function publicApi(value) { return value; }";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects narrative JSDoc description before contract tags", () => {
+  const source = "/**\n * The method invokes a parser and stores the result for later.\n * @param {string} value input\n * @returns {number} result\n */\nexport function publicApi(value) { return 1; }";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects narrative sentence appended to an @returns tag", () => {
+  const source = "/**\n * @returns {number} The function performs a calculation.\n */\nexport function publicApi() { return 1; }";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 

@@ -431,7 +431,11 @@ function isCopyrightHolder(value) {
   }
 
   const oneWordName = tokens.length === 1 && isNameToken(tokens[0]);
+  const hasExtendedPersonalNameCue = tokens.length === 2 ||
+    normalizedTokens.some(token => personParticles.has(token)) ||
+    tokens.slice(1, -1).some(token => /^[\p{Lu}]\.?$/u.test(token));
   const personalName = tokens.length >= 2 && tokens.length <= 4 &&
+    hasExtendedPersonalNameCue &&
     !excludedPersonStarts.has(normalizedTokens[0]) &&
     tokens.every((token, index) => isNameToken(token) ||
       (index > 0 && index < tokens.length - 1 && personParticles.has(normalizedTokens[index])));
@@ -489,7 +493,44 @@ function isPublicApiDoc(comment, source, filePath) {
   const descriptionLines = firstTag < 0 ? [] : contractLines.slice(0, firstTag);
   const taggedLines = firstTag < 0 ? [] : contractLines.slice(firstTag);
   const narrativeDescription = /\b(?:implementation|internal|private|detail|details|note|remember|important|temporary|currently|workaround|debug|instead|because|must|should|always|never|helper|log|logs|logging|before|after|returning)\b/i;
+  const narrativeSubject = /\b(?:function|method|helper|routine|module|class|component)\b/i;
+  const apiDescriptionStart = /^(?:returns?|validates?|normalizes?|parses?|resolves?|creates?|builds?|generates?|converts?|encodes?|decodes?|extracts?|formats?|checks?|selects?|provides?|computes?|calculates?)\b/i;
   const descriptionLength = descriptionLines.reduce((length, line) => length + line.text.length, 0);
+  const descriptionText = descriptionLines.map(line => line.text).join(" ");
+  const descriptionIsContract = descriptionLines.length === 0 ||
+    (descriptionLines.length <= 2 && descriptionLength <= 240 &&
+      apiDescriptionStart.test(descriptionText) &&
+      !narrativeDescription.test(descriptionText) &&
+      !narrativeSubject.test(descriptionText));
+  const tagDescriptionIsValid = (tagName, text) => {
+    const tagMatch = /^@(param|returns?|throws|deprecated)\s+([\s\S]+)$/.exec(text);
+    if (!tagMatch) {
+      return false;
+    }
+    let description = tagMatch[2].trim();
+    if (tagName === "param") {
+      description = description
+        .replace(/^\{[^}]+\}\s*/, "")
+        .replace(/^\S+\s*/, "")
+        .trim();
+    } else if (tagName === "returns" || tagName === "return") {
+      description = description.replace(/^\{[^}]+\}\s*/, "").trim();
+    } else if (tagName === "throws") {
+      description = description.startsWith("{")
+        ? description.replace(/^\{[^}]+\}\s*/, "").trim()
+        : description.replace(/^\S+\s*/, "").trim();
+    }
+    if (!description) {
+      return true;
+    }
+    const wordCount = (description.match(/[\p{L}\p{N}’'-]+/gu) || []).length;
+    const maxWords = tagName === "returns" || tagName === "return" ? 4 :
+      tagName === "param" ? 8 : 12;
+    return wordCount <= maxWords &&
+      !narrativeDescription.test(description) &&
+      !/[.!?]\s+[A-Z]/.test(description) &&
+      (!(tagName === "returns" || tagName === "return") || !narrativeSubject.test(description));
+  };
   let currentTag = null;
   let continuationLines = 0;
   const taggedLinesValid = taggedLines.every(({ text, indent }) => {
@@ -497,7 +538,9 @@ function isPublicApiDoc(comment, source, filePath) {
     if (tag) {
       currentTag = tag[1];
       continuationLines = 0;
-      return !narrativeDescription.test(text) && !/[.!?]\s+[A-Z]/.test(text);
+      return tagDescriptionIsValid(currentTag, text) &&
+        !narrativeDescription.test(text) &&
+        !/[.!?]\s+[A-Z]/.test(text);
     }
     if (currentTag !== "param" || indent < 1 || continuationLines >= 2 ||
         text.length > 160 || narrativeDescription.test(text) || /[.!?]\s+[A-Z]/.test(text)) {
@@ -507,8 +550,7 @@ function isPublicApiDoc(comment, source, filePath) {
     return true;
   });
   const conciseContract = firstTag >= 0 && contractLines.length <= 12 &&
-    descriptionLines.length <= 2 && descriptionLength <= 240 &&
-    descriptionLines.every(({ text }) => text.length <= 160 && !narrativeDescription.test(text)) &&
+    descriptionIsContract &&
     taggedLinesValid;
   return Boolean(exportedDeclaration && conciseContract);
 }
