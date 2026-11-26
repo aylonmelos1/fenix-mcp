@@ -403,24 +403,42 @@ function commentContentLines(comment) {
 
 function isCopyrightHolder(value) {
   const holder = value.trim();
-  if (holder.length === 0 || holder.length > 120) {
+  if (holder.length === 0 || holder.length > 120 ||
+      /[!?]$/.test(holder) ||
+      (holder.endsWith(".") && !/\b(?:inc|ltd|corp|co|jr|sr|st|llc|gmbh|plc|b\.v|s\.a)\.$/i.test(holder))) {
     return false;
   }
 
   const tokens = holder.match(/[\p{L}\p{N}]+(?:[’'][\p{L}\p{N}]+)*\.?/gu) || [];
-  const connectors = new Set(["and", "of", "the", "for", "by"]);
-  const narrativeWords = new Set(["this", "that", "these", "those", "file", "text", "source", "when", "because", "must", "should", "shall", "will", "would", "could", "can", "is", "are", "was", "were", "be", "been", "being", "generated", "maintained", "update", "updated", "preserve", "preserved", "stay", "stays", "keep", "kept", "include", "includes", "contains", "provides", "requires", "describes", "refers", "please", "ensure", "note"]);
+  const normalizedTokens = tokens.map(token => token.replace(/\.$/, "").toLowerCase());
+  const organizationConnectors = new Set(["and", "of", "the", "for", "by", "in", "at"]);
+  const personParticles = new Set(["de", "del", "da", "do", "dos", "di", "du", "van", "von", "der", "la", "le"]);
+  const organizationSuffixes = new Set(["foundation", "corporation", "corp", "inc", "ltd", "limited", "llc", "gmbh", "plc", "company", "association", "institute", "university", "consortium", "organization", "organisation", "network", "society", "collective", "contributors", "developers", "authors", "team", "group", "project", "initiative", "committee", "community", "conservancy", "laboratory", "laboratories", "labs", "center", "centre", "trust", "council", "board", "union", "department", "office", "museum", "library", "press", "studio", "agency", "club", "school", "church", "enterprises", "holdings", "partners", "partnership", "industries", "systems", "solutions", "technologies"]);
+  const narrativeWords = new Set(["this", "that", "these", "those", "file", "text", "source", "when", "because", "must", "should", "shall", "will", "would", "could", "can", "is", "are", "was", "were", "be", "been", "being", "generated", "maintained", "maintains", "update", "updates", "updated", "preserve", "preserves", "preserved", "stay", "stays", "keep", "keeps", "kept", "include", "includes", "contains", "provides", "requires", "describes", "describe", "refers", "please", "ensure", "ensures", "note", "comments", "expected", "configuration", "documentation", "guidelines", "consistent", "consistency", "better", "best", "valid", "invalid", "important", "necessary", "always", "never", "follow", "follows", "use", "uses", "used", "create", "creates", "created", "made", "make", "makes", "means", "belongs", "belong", "remains", "remain", "represents", "public", "private", "implementation", "detail", "details", "internal", "before", "handle", "handles", "handled", "handling", "return", "returns", "returned", "returning"]);
+  const excludedPersonStarts = new Set(["the", "a", "an", "this", "that", "these", "those", "all", "our", "your", "some", "every", "each", "please"]);
   const isNameToken = token => {
     const normalized = token.replace(/\.$/, "");
-    return connectors.has(normalized.toLowerCase()) ||
-      /^[\p{Lu}\p{Lt}][\p{L}\p{N}'’.-]*$/u.test(token) ||
+    return /^[\p{Lu}\p{Lt}][\p{L}\p{N}'’.-]*$/u.test(token) ||
       /^[A-Z0-9]{2,}$/u.test(normalized) ||
       /^[a-z][\p{L}\p{N}'’.-]*[A-Z][\p{L}\p{N}'’.-]*$/u.test(normalized);
   };
-  return tokens.length > 0 && tokens.length <= 12 &&
-    /^[\p{L}\p{N}.,&'’() -]+$/u.test(holder) &&
-    !tokens.some(token => narrativeWords.has(token.replace(/\.$/, "").toLowerCase())) &&
-    tokens.every(isNameToken);
+  if (tokens.length === 0 || tokens.length > 12 ||
+      !/^[\p{L}\p{N}.,&'’() -]+$/u.test(holder) ||
+      normalizedTokens.some(token => narrativeWords.has(token))) {
+    return false;
+  }
+
+  const oneWordName = tokens.length === 1 && isNameToken(tokens[0]);
+  const personalName = tokens.length >= 2 && tokens.length <= 4 &&
+    !excludedPersonStarts.has(normalizedTokens[0]) &&
+    tokens.every((token, index) => isNameToken(token) ||
+      (index > 0 && index < tokens.length - 1 && personParticles.has(normalizedTokens[index])));
+  const organizationName = tokens.length >= 2 &&
+    organizationSuffixes.has(normalizedTokens.at(-1)) &&
+    tokens.every((token, index) => isNameToken(token) ||
+      organizationConnectors.has(normalizedTokens[index]) ||
+      personParticles.has(normalizedTokens[index]));
+  return oneWordName || personalName || organizationName;
 }
 
 function isHeaderLicense(comment, source) {
@@ -462,8 +480,15 @@ function isPublicApiDoc(comment, source, filePath) {
     .map(line => line.replace(/^\s*\*\s?/, "").trim())
     .filter(Boolean);
   const contractTag = /^@(param|returns?|throws|deprecated)\s+\S/;
-  const conciseContract = contractLines.length > 0 && contractLines.length <= 12 &&
-    contractLines.every(line => contractTag.test(line));
+  const firstTag = contractLines.findIndex(line => contractTag.test(line));
+  const descriptionLines = firstTag < 0 ? [] : contractLines.slice(0, firstTag);
+  const taggedLines = firstTag < 0 ? [] : contractLines.slice(firstTag);
+  const narrativeDescription = /\b(?:implementation|internal|private|detail|details|note|remember|important|temporary|currently|workaround|debug|instead|because|must|should|always|never)\b/i;
+  const descriptionLength = descriptionLines.reduce((length, line) => length + line.length, 0);
+  const conciseContract = firstTag >= 0 && contractLines.length <= 12 &&
+    descriptionLines.length <= 2 && descriptionLength <= 240 &&
+    descriptionLines.every(line => line.length <= 160 && !narrativeDescription.test(line)) &&
+    taggedLines.every(line => contractTag.test(line));
   return Boolean(exportedDeclaration && conciseContract);
 }
 

@@ -52,6 +52,16 @@ test("rejects narrative prose as an SPDX copyright holder", () => {
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
+test("rejects title-case prose as an SPDX copyright holder", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Public Comments Describe The Expected Configuration\n */\nexport const value = 1;";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects the reported title-case sentence as an SPDX holder", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Applications Handle Requests Before Returning Results\n */\nexport const value = 1;";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
 test("allows a named SPDX copyright holder", () => {
   const source = "/*\n * SPDX-FileCopyrightText: 2026 The Apache Software Foundation\n */\nexport const value = 1;";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
@@ -65,6 +75,11 @@ test("allows JSDoc contracts on exported declarations", () => {
 test("rejects narrative prose mixed into an SPDX header", () => {
   const source = "/*\n * SPDX-License-Identifier: MIT\n * This component relies on this license for unrelated implementation notes.\n */\nexport const value = 1;";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("allows a concise JSDoc description with exported contract tags", () => {
+  const source = "/**\n * Returns a safe callback URL for the matching authorization flow.\n * @param {string} callbackUrl The callback URL to validate.\n * @returns {URL} The validated callback URL.\n */\nexport function publicApi(callbackUrl) { return new URL(callbackUrl); }";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4, 5])), []);
 });
 
 test("rejects narrative prose mixed into an exported JSDoc contract", () => {
