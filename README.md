@@ -142,6 +142,15 @@ Consulte as [notas de evidência e a tabela de operações](docs/frontend-endpoi
 
 ## Desenvolvimento e manutenção
 
+Antes de abrir um PR, rode a suíte do scanner e verifique as linhas adicionadas em relação à branch base:
+
+```sh
+npm test
+npm run check:no-comments -- --base origin/main
+```
+
+A revisão humana ainda deve avaliar o sentido de cada exceção aprovada pelo scanner.
+
 ```sh
 npm run docs:endpoints
 ```

@@ -11,7 +11,10 @@
     "start": "node src/index.js",
     "keys": "node scripts/generate-oauth-keys.mjs",
     "migrate:oauth": "node scripts/migrate-oauth.mjs",
-    "docs:endpoints": "node scripts/render-endpoint-docs.mjs"
+    "docs:endpoints": "node scripts/render-endpoint-docs.mjs",
+    "check:no-comments": "node scripts/check-no-comments.mjs",
+    "lint": "node scripts/check-no-comments.mjs",
+    "test": "node --test"
   },
   "dependencies": {
     "@modelcontextprotocol/node": "^2.0.0",
