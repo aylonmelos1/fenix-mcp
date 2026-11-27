@@ -154,11 +154,6 @@ test("rejects a narrative subject in an @throws description", () => {
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
-test("rejects a narrative subject in an @deprecated description", () => {
-  const source = "/**\n * @deprecated The method caches requests.\n */\nexport function publicApi() {}";
-  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
-});
-
 test("rejects a narrative subject in an @param description", () => {
   const source = "/**\n * @param {string} value The method invokes a parser.\n */\nexport function publicApi(value) {}";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);

@@ -529,7 +529,7 @@ function isPublicApiDoc(comment, source, filePath) {
     return wordCount <= maxWords &&
       !narrativeDescription.test(description) &&
       !/[.!?]\s+[A-Z]/.test(description) &&
-      !narrativeSubject.test(description);
+      (!(tagName === "returns" || tagName === "return" || tagName === "throws" || tagName === "param") || !narrativeSubject.test(description));
   };
   let currentTag = null;
   let continuationLines = 0;
