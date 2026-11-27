@@ -659,11 +659,15 @@ function isExternalLimitationReference(comment) {
   const issueRepository = githubIssue ? (githubIssue[1] + "/" + githubIssue[2]).toLowerCase() : null;
   const issueSources = issueRepository ? externalIssueSourceLabels.get(issueRepository) : null;
   const issueLabelMatches = issueSources?.has(sourceLabel) === true;
-  const rfcSource = /^rfc\d+$/i.test(sourceLabel) || sourceLabel === "ietf";
-  const rfcReference = rfcSource
-    ? (host === "www.rfc-editor.org" && /^\/rfc\/rfc\d+\/?$/i.test(url.pathname)) ||
-      (host === "datatracker.ietf.org" && /^\/doc\/html\/rfc\d+\/?$/i.test(url.pathname))
-    : false;
+  const rfcNumber = /^rfc(\d+)$/i.exec(sourceLabel)?.[1];
+  const rfcSource = rfcNumber !== undefined || sourceLabel === "ietf";
+  const rfcPath = host === "www.rfc-editor.org"
+    ? /^\/rfc\/rfc(\d+)\/?$/i.exec(url.pathname)
+    : host === "datatracker.ietf.org"
+      ? /^\/doc\/html\/rfc(\d+)\/?$/i.exec(url.pathname)
+      : null;
+  const rfcReference = rfcSource && rfcPath !== null &&
+    (rfcNumber === undefined || rfcNumber === rfcPath[1]);
 
   return (documentationLabelMatches && documentationPathMatches) || issueLabelMatches || rfcReference;
 }

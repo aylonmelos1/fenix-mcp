@@ -227,6 +227,15 @@ test("marks structurally valid external limitation claims for human verification
   assert.match(requirements[0].reason, /supports the stated behavior and impact/);
 });
 
+test("requires numbered RFC labels to match the reference", () => {
+  const mismatched = "// External limitation: RFC 9110: behavior: The parser applies the documented recovery procedure; impact: clients must follow the same fallback behavior; https://www.rfc-editor.org/rfc/rfc9999";
+  const matching = mismatched.replace("rfc9999", "rfc9110");
+  const ietf = mismatched.replace("RFC 9110", "IETF");
+  assert.equal(findAddedCommentFindings("src/example.js", mismatched, new Set([1])).length, 1);
+  assert.deepEqual(findAddedCommentFindings("src/example.js", matching, new Set([1])), []);
+  assert.deepEqual(findAddedCommentFindings("src/example.js", ietf, new Set([1])), []);
+});
+
 test("rejects placeholder or generic hosts for external limitation exceptions", () => {
   const placeholder = "// External limitation: GitHub REST API: behavior: The endpoint validates requests before routing; impact: clients must preserve that documented order; https://example.org/docs";
   const generic = "// External limitation: npm: behavior: The CLI resolves package versions before installation; impact: scripts must respect the documented command behavior; https://vendor.invalid/docs";
