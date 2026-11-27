@@ -74,8 +74,18 @@ test("rejects retrieved-data narrative as an SPDX holder", () => {
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
+test("rejects retrieved-data narrative using with in an SPDX holder", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Applications Retrieve Data With Stable Callback Technologies\n */\nexport const value = 1;";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
 test("rejects ambiguous title-case wording as an SPDX holder", () => {
   const source = "/*\n * SPDX-FileCopyrightText: 2026 Cache Expiration Strategy\n */\nexport const value = 1;";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects a two-word title-case feature as an SPDX holder", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Cache Expiration\n */\nexport const value = 1;";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
@@ -137,6 +147,21 @@ test("allows a concise multiline JSDoc param description", () => {
 test("allows the reported multiline JSDoc parameter continuation", () => {
   const source = "/**\n * @param options configuration object\n *   with a supported mode\n * @returns normalized value\n */\nexport function normalize(options) { return options.mode; }";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4, 5])), []);
+});
+
+test("rejects a narrative subject in an @throws description", () => {
+  const source = "/**\n * @throws {Error} The method caches requests.\n */\nexport function publicApi() {}";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects a narrative subject in an @deprecated description", () => {
+  const source = "/**\n * @deprecated The method caches requests.\n */\nexport function publicApi() {}";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
+});
+
+test("rejects a narrative subject in an @param description", () => {
+  const source = "/**\n * @param {string} value The method invokes a parser.\n */\nexport function publicApi(value) {}";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
 
 test("rejects narrative appended to a JSDoc contract tag", () => {
