@@ -428,3 +428,14 @@ test("requires the external source label to match the documentation host", () =>
   const source = "// External limitation: Vendor API: behavior: The URL parser normalizes encoded host separators; impact: clients must follow the documented origin parsing order; https://nodejs.org/api/url.html";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1])).length, 1);
 });
+
+
+test("rejects a narrative subject without a determiner in @throws", () => {
+  const source = "/**\n * @throws {Error} method caches requests\n */\nexport function publicApi() {}";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])).length, 1);
+});
+
+test("allows a callable @returns description", () => {
+  const source = "/**\n * @returns {Function} function to invoke\n */\nexport function publicApi() {}";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
+});
