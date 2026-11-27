@@ -445,3 +445,9 @@ test("rejects a narrative subject without a determiner in an @param description"
   const source = "/**\n * @param {string} value method invokes a parser.\n */\nexport function publicApi(value) {}";
   assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4])).length, 1);
 });
+
+
+test("rejects narrative in an indented multiline @param continuation", () => {
+  const source = "/**\n * @param {string} value\n *   method invokes a parser\n */\nexport function publicApi(value) {}";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4])).length, 1);
+});

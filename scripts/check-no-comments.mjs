@@ -553,7 +553,9 @@ function isPublicApiDoc(comment, source, filePath) {
         !/[.!?]\s+[A-Z]/.test(text);
     }
     if (currentTag !== "param" || indent < 1 || continuationLines >= 2 ||
-        text.length > 160 || narrativeDescription.test(text) || /[.!?]\s+[A-Z]/.test(text)) {
+        text.length > 160 || narrativeDescription.test(text) || narrativeSubjectPhrase.test(text) ||
+        (unqualifiedNarrativeSubject.test(text) && !callableRoleDescription.test(text)) ||
+        /[.!?]\s+[A-Z]/.test(text)) {
       return false;
     }
     continuationLines += 1;
