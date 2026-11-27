@@ -439,3 +439,9 @@ test("allows a callable @returns description", () => {
   const source = "/**\n * @returns {Function} function to invoke\n */\nexport function publicApi() {}";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
 });
+
+
+test("rejects a narrative subject without a determiner in an @param description", () => {
+  const source = "/**\n * @param {string} value method invokes a parser.\n */\nexport function publicApi(value) {}";
+  assert.equal(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4])).length, 1);
+});

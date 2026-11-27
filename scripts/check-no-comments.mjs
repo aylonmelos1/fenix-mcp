@@ -497,8 +497,8 @@ function isPublicApiDoc(comment, source, filePath) {
   const narrativeDescription = /\b(?:implementation|internal|private|detail|details|note|remember|important|temporary|currently|workaround|debug|instead|because|must|should|always|never|helper|log|logs|logging|before|after|returning)\b/i;
   const narrativeSubject = /\b(?:function|method|helper|routine|module|class|component)\b/i;
   const narrativeSubjectPhrase = /\b(?:the|this|that|these|those|a|an)\s+(?:function|method|helper|routine|module|class|component)\b/i;
-  const unqualifiedThrowsSubject = /^(?:function|method|helper|routine|module|class|component)\b/i;
-  const callableReturnContract = /^function to invoke$/i;
+  const unqualifiedNarrativeSubject = /^(?:function|method|helper|routine|module|class|component)\b/i;
+  const callableRoleDescription = /^function to invoke$/i;
   const apiDescriptionStart = /^(?:returns?|validates?|normalizes?|parses?|resolves?|creates?|builds?|generates?|converts?|encodes?|decodes?|extracts?|formats?|checks?|selects?|provides?|computes?|calculates?)\b/i;
   const descriptionLength = descriptionLines.reduce((length, line) => length + line.text.length, 0);
   const descriptionText = descriptionLines.map(line => line.text).join(" ");
@@ -535,10 +535,11 @@ function isPublicApiDoc(comment, source, filePath) {
       !narrativeDescription.test(description) &&
       !/[.!?]\s+[A-Z]/.test(description) &&
       (!(tagName === "returns" || tagName === "return") ||
-        !narrativeSubject.test(description) || callableReturnContract.test(description)) &&
+        !narrativeSubject.test(description) || callableRoleDescription.test(description)) &&
       (!(tagName === "throws" || tagName === "param") ||
         (!narrativeSubjectPhrase.test(description) &&
-          !(tagName === "throws" && unqualifiedThrowsSubject.test(description))));
+          (!unqualifiedNarrativeSubject.test(description) ||
+            (tagName === "param" && callableRoleDescription.test(description)))));
   };
   let currentTag = null;
   let continuationLines = 0;
