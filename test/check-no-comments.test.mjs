@@ -109,6 +109,11 @@ test("allows an organization name containing a narrative verb", () => {
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
 });
 
+test("allows an organization name containing cache", () => {
+  const source = "/*\n * SPDX-FileCopyrightText: 2026 Cache Systems, Inc.\n */\nexport const value = 1;";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
+});
+
 test("allows an extended personal name with a middle initial", () => {
   const source = "/*\n * SPDX-FileCopyrightText: 2026 Jane Q. Doe\n */\nexport const value = 1;";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
@@ -142,6 +147,11 @@ test("allows a concise JSDoc description with exported contract tags", () => {
 test("allows a concise multiline JSDoc param description", () => {
   const source = "/**\n * @param {string} value\n *   The input value to normalize for the callback.\n */\nexport function publicApi(value) { return value; }";
   assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3, 4])), []);
+});
+
+test("allows a function parameter described by its role", () => {
+  const source = "/**\n * @param {Function} callback function to invoke\n */\nexport function publicApi(callback) { callback(); }";
+  assert.deepEqual(findAddedCommentFindings("src/example.js", source, new Set([1, 2, 3])), []);
 });
 
 test("allows the reported multiline JSDoc parameter continuation", () => {

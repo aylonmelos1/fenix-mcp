@@ -414,9 +414,10 @@ function isCopyrightHolder(value) {
   const organizationConnectors = new Set(["and", "of", "the", "for", "by", "in", "at"]);
   const personParticles = new Set(["de", "del", "da", "do", "dos", "di", "du", "van", "von", "der", "la", "le"]);
   const organizationSuffixes = new Set(["foundation", "corporation", "corp", "inc", "ltd", "limited", "llc", "gmbh", "plc", "company", "association", "institute", "university", "consortium", "organization", "organisation", "network", "society", "collective", "contributors", "developers", "authors", "team", "group", "project", "initiative", "committee", "community", "conservancy", "laboratory", "laboratories", "labs", "center", "centre", "trust", "council", "board", "union", "department", "office", "museum", "library", "press", "studio", "agency", "club", "school", "church", "enterprises", "holdings", "partners", "partnership", "industries", "systems", "solutions", "technologies"]);
-  const narrativeWords = new Set(["this", "that", "these", "those", "file", "text", "source", "when", "because", "must", "should", "shall", "will", "would", "could", "can", "is", "are", "was", "were", "be", "been", "being", "generated", "process", "processes", "processed", "processing", "request", "requests", "requested", "requesting", "maintained", "maintains", "update", "updates", "updated", "preserve", "preserves", "preserved", "stay", "stays", "keep", "keeps", "kept", "include", "includes", "contains", "provides", "requires", "describes", "describe", "refers", "please", "ensure", "ensures", "note", "comments", "expected", "configuration", "documentation", "guidelines", "consistent", "consistency", "better", "best", "valid", "invalid", "important", "necessary", "always", "never", "follow", "follows", "use", "uses", "used", "create", "creates", "created", "made", "make", "makes", "means", "belongs", "belong", "remains", "remain", "represents", "public", "private", "implementation", "detail", "details", "internal", "before", "handle", "handles", "handled", "handling", "return", "returns", "returned", "returning", "with", "cache", "expiration"]);
+  const narrativeWords = new Set(["this", "that", "these", "those", "file", "text", "source", "when", "because", "must", "should", "shall", "will", "would", "could", "can", "is", "are", "was", "were", "be", "been", "being", "generated", "process", "processes", "processed", "processing", "request", "requests", "requested", "requesting", "maintained", "maintains", "update", "updates", "updated", "preserve", "preserves", "preserved", "stay", "stays", "keep", "keeps", "kept", "include", "includes", "contains", "provides", "requires", "describes", "describe", "refers", "please", "ensure", "ensures", "note", "comments", "expected", "configuration", "documentation", "guidelines", "consistent", "consistency", "better", "best", "valid", "invalid", "important", "necessary", "always", "never", "follow", "follows", "use", "uses", "used", "create", "creates", "created", "made", "make", "makes", "means", "belongs", "belong", "remains", "remain", "represents", "public", "private", "implementation", "detail", "details", "internal", "before", "handle", "handles", "handled", "handling", "return", "returns", "returned", "returning"]);
+  const ambiguousTitleCasePhrases = new Set(["cache expiration"]);
   const excludedPersonStarts = new Set(["the", "a", "an", "this", "that", "these", "those", "all", "our", "your", "some", "every", "each", "please"]);
-  const narrativeSentence = /\b[\p{Lu}][\p{L}\p{N}’'-]*\s+(?:route|routes|routed|routing|handle|handles|handled|handling|process|processes|processed|processing|retrieve|retrieves|retrieved|retrieving|send|sends|sent|sending|return|returns|returned|returning)\s+[\p{Lu}][\p{L}\p{N}’'-]*\s+(?:through|before|after|while|when|using|via)\b/iu;
+  const narrativeSentence = /\b[\p{Lu}][\p{L}\p{N}’'-]*\s+(?:route|routes|routed|routing|handle|handles|handled|handling|process|processes|processed|processing|retrieve|retrieves|retrieved|retrieving|send|sends|sent|sending|return|returns|returned|returning)\s+[\p{Lu}][\p{L}\p{N}’'-]*\s+(?:through|before|after|while|when|using|via|with)\b/iu;
   const isNameToken = token => {
     const normalized = token.replace(/\.$/, "");
     return /^[\p{Lu}\p{Lt}][\p{L}\p{N}'’.-]*$/u.test(token) ||
@@ -426,6 +427,7 @@ function isCopyrightHolder(value) {
   if (tokens.length === 0 || tokens.length > 12 ||
       !/^[\p{L}\p{N}.,&'’() -]+$/u.test(holder) ||
       normalizedTokens.some(token => narrativeWords.has(token)) ||
+      ambiguousTitleCasePhrases.has(normalizedTokens.join(" ")) ||
       narrativeSentence.test(holder)) {
     return false;
   }
@@ -494,6 +496,7 @@ function isPublicApiDoc(comment, source, filePath) {
   const taggedLines = firstTag < 0 ? [] : contractLines.slice(firstTag);
   const narrativeDescription = /\b(?:implementation|internal|private|detail|details|note|remember|important|temporary|currently|workaround|debug|instead|because|must|should|always|never|helper|log|logs|logging|before|after|returning)\b/i;
   const narrativeSubject = /\b(?:function|method|helper|routine|module|class|component)\b/i;
+  const narrativeSubjectPhrase = /\b(?:the|this|that|these|those|a|an)\s+(?:function|method|helper|routine|module|class|component)\b/i;
   const apiDescriptionStart = /^(?:returns?|validates?|normalizes?|parses?|resolves?|creates?|builds?|generates?|converts?|encodes?|decodes?|extracts?|formats?|checks?|selects?|provides?|computes?|calculates?)\b/i;
   const descriptionLength = descriptionLines.reduce((length, line) => length + line.text.length, 0);
   const descriptionText = descriptionLines.map(line => line.text).join(" ");
@@ -529,7 +532,8 @@ function isPublicApiDoc(comment, source, filePath) {
     return wordCount <= maxWords &&
       !narrativeDescription.test(description) &&
       !/[.!?]\s+[A-Z]/.test(description) &&
-      (!(tagName === "returns" || tagName === "return" || tagName === "throws" || tagName === "param") || !narrativeSubject.test(description));
+      (!(tagName === "returns" || tagName === "return") || !narrativeSubject.test(description)) &&
+      (!(tagName === "throws" || tagName === "param") || !narrativeSubjectPhrase.test(description));
   };
   let currentTag = null;
   let continuationLines = 0;
